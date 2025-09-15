@@ -30,7 +30,7 @@ O Organizador é responsável por criar e gerenciar os eventos.
     * *Não implementado*
 
 7.  **Recebe avaliações sobre sua organização.**
-    * *Não implementado*.
+    * `POST /partidas/{id}/avaliacoes`.
 
 ### Jornada do Jogador (Participante)
 
