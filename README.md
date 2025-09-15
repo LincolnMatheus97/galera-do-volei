@@ -2,7 +2,7 @@
 
 ## Visão Geral e Jornada do Usuário
 
-Este documento apresenta o design de uma API para a atividade acadêmica "Galera do Vôlei". O principal objetivo é a construção e visualização de uma API que vai além das operações básicas de um CRUD (Create, Read, Update, Delete). pensando em "romper a barreira dos CRUDs ordinários", o design foca na modelagem de processos e transações que representam o fluxo real de interações dos usuários. Para guiar o desenvolvimento, essas interações foram mapeadas em duas jornadas principais: a do **Organizador** e a do **Jogador**.
+Este documento apresenta o design de uma API para a atividade acadêmica "Galera do Vôlei". O principal objetivo é a construção e visualização de uma API que vai além das operações básicas de um CRUD (Create, Read, Update, Delete). Pensando em "romper a barreira dos CRUDs ordinários", o design foca na modelagem de processos e transações que representam o fluxo real de interações dos usuários. Para guiar o desenvolvimento, essas interações foram mapeadas em duas jornadas principais: a do **Organizador** e a do **Jogador**.
 
 ### Jornada do Organizador (Moderador)
 
