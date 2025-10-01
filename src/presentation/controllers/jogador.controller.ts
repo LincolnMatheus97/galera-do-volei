@@ -1,4 +1,4 @@
-import { application, type Request, type Response } from 'express';
+import { type Request, type Response } from 'express';
 import z from 'zod';
 import * as jogadorService from '../../application/service/jogador.service.js'
 
