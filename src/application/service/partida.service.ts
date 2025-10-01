@@ -1,3 +1,4 @@
+import { error } from "console";
 import type { Partida, Jogador, Inscricao } from "../../main/index.model.js";
 import { indexPorID, indexPorNome } from "../../utils/utils.js";
 import { jogadores } from "./jogador.service.js";
@@ -19,7 +20,7 @@ export const listarPartidas = () => {
     return partidas;
 }
 
-export const criarPartida = (dataJogador: Omit<Jogador, 'id' | 'moderador' | 'sexo' | 'categoria'>, dataPartida: Omit<Partida, 'id' | 'data' | 'situacao' | 'participantes' | 'inscricoes' | 'avaliacoes'>) => {
+export const criarPartida = (dataJogador: Omit<Jogador, 'id' | 'moderador' | 'sexo' | 'categoria'>, dataPartida: Omit<Partida, 'id' | 'data' | 'situacao' | 'moderador' | 'participantes' | 'inscricoes' | 'avaliacoes'>) => {
     const jogadorIndex = indexPorNome(jogadores, dataJogador.nome);
 
     if (jogadorIndex === -1 || jogadores[jogadorIndex]?.id === undefined) {
@@ -76,13 +77,13 @@ export const adicionarInscricao = (id: number, dataJogador: Omit<Jogador, 'id' |
     const partida = partidas[partidaIndex];
 
     if (!partida) {
-        return false;
+        throw new Error("Partida não encontrada");
     }
 
     const jogadorIndex = indexPorNome(jogadores, dataJogador.nome);
     const idJogador = jogadores[jogadorIndex]?.id;
     if (typeof idJogador !== "number") {
-        return false;
+        throw new Error("Jogador não encontrado");
     }
 
     const novaInscricao = {
@@ -155,7 +156,7 @@ export const adicionarAvaliacao = (id: number, nota: number, comentario: string,
     const jaParticipa = partida?.participantes.some(part => part.nome_jogador === dataJogador.nome);
 
     if (typeof idJogador !== "number" || !jaParticipa) {
-       return false;
+       throw new Error("Jogador não encontrado");
     }
 
     const novaAvaliacao = {
