@@ -1,9 +1,10 @@
 import type { Jogador } from "../../main/index.model.js";
+import { indexPorID } from "../../utils/utils.js";
 
-let jogadores: Jogador[] = [
-    { id: 1, nome: "Thalisson", moderador: true, sexo: "Masculino", categoria: "Amador"},
-    { id: 2, nome: "Natiele", moderador: false, sexo: "Feminino", categoria: "Intermediario"},
-    { id: 3, nome: "Marcos", moderador: false, sexo: "Masculino", categoria: "Amador"}
+export let jogadores: Jogador[] = [
+    { id: 1, nome: "Thalisson", moderador: true, sexo: "Masculino", categoria: "Amador" },
+    { id: 2, nome: "Natiele", moderador: false, sexo: "Feminino", categoria: "Intermediario" },
+    { id: 3, nome: "Marcos", moderador: false, sexo: "Masculino", categoria: "Amador" }
 ];
 
 export const listarJogadores = () => {
@@ -23,21 +24,23 @@ export const criarJogador = (data: Omit<Jogador, 'id' | 'moderador'>) => {
 }
 
 export const jogadorExiste = (id: number) => {
-    const jogadorIndex = jogadores.findIndex(jog => jog.id === id);
-    
+    const jogadorIndex = indexPorID(jogadores, id);
+
     if (jogadorIndex === -1) {
-       return false;
+        return false;
     }
 
     return true;
 }
 
 export const excluirJogador = (id: number) => {
-    jogadores.splice(id, 1);
+    const jogadorIndex = indexPorID(jogadores, id);
+    jogadores.splice(jogadorIndex, 1);
 }
 
 export const atualizarDados = (id: number, data: Omit<Jogador, 'id' | 'moderador'>) => {
-    const jogadorAtualizado = jogadores[id]!;
+    const jogadorIndex = indexPorID(jogadores, id);
+    const jogadorAtualizado = jogadores[jogadorIndex]!;
 
     jogadorAtualizado.nome = data.nome ?? jogadorAtualizado.nome;
     jogadorAtualizado.sexo = data.sexo ?? jogadorAtualizado.sexo;
@@ -46,7 +49,8 @@ export const atualizarDados = (id: number, data: Omit<Jogador, 'id' | 'moderador
 }
 
 export const atualizarModeracao = (id: number, data: Omit<Jogador, 'id' | 'nome' | 'sexo' | 'categoria'>) => {
-    const jogadorAtualizado = jogadores[id]!;
+    const jogadorIndex = indexPorID(jogadores, id);
+    const jogadorAtualizado = jogadores[jogadorIndex]!;
 
     jogadorAtualizado.moderador = data.moderador ?? jogadorAtualizado.moderador;
     return jogadorAtualizado;
