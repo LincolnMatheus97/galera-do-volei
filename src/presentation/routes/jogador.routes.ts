@@ -5,8 +5,8 @@ const router = Router();
 
 router.get('/jogadores', jogadorController.listar);
 router.post('/jogadores', jogadorController.criar);
-router.delete('/jogadores', jogadorController.deletar);
+router.delete('/jogadores/:id', jogadorController.deletar);
 router.patch('/jogadores/:id', jogadorController.atualizarDados);
-router.patch('jogadores/:id/moderador', jogadorController.atualizarModerador);
+router.patch('/jogadores/:id/moderador', jogadorController.atualizarModerador);
 
 export default router;
