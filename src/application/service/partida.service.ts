@@ -2,6 +2,7 @@ import { error } from "console";
 import type { Partida, Jogador, Inscricao } from "../../main/index.model.js";
 import { indexPorID, indexPorNome } from "../../utils/utils.js";
 import { jogadores } from "./jogador.service.js";
+import { number } from "zod";
 
 export let partidas: Partida[] = [
     {
@@ -80,10 +81,15 @@ export const adicionarInscricao = (id: number, dataJogador: Omit<Jogador, 'id' |
         throw new Error("Partida não encontrada");
     }
 
+    if (partida.situacao === "fechado") {
+        throw new Error("Partida já fechada");
+    }
+
     const jogadorIndex = indexPorNome(jogadores, dataJogador.nome);
     const idJogador = jogadores[jogadorIndex]?.id;
-    if (typeof idJogador !== "number") {
-        throw new Error("Jogador não encontrado");
+    
+    if (typeof(idJogador) != "number") {
+        throw new Error('ID de jogador não existente');
     }
 
     const novaInscricao = {
