@@ -9,9 +9,9 @@ const criarJogadorSchema = z.object({
 });
 
 const edtDadosBasicosJogadorSchema = z.object({
-    nome: z.string().min(3),
-    sexo: z.string(),
-    categoria: z.string()
+    nome: z.string().min(3).optional(),
+    sexo: z.string().optional(),
+    categoria: z.string().optional()
 });
 
 const edtModeracaoJogadorSchema = z.object({
@@ -20,16 +20,16 @@ const edtModeracaoJogadorSchema = z.object({
 
 export const listar = (req: Request, res: Response) => {
     const todosOsJogadores = jogadorService.listarJogadores();
-    res.status(200).json(todosOsJogadores);
+    return res.status(200).json(todosOsJogadores);
 }
 
 export const criar = (req: Request, res: Response) => {
     try {
         const data = criarJogadorSchema.parse(req.body);
         const novoJogador = jogadorService.criarJogador(data);
-        res.status(201).json(novoJogador);
+        return res.status(201).json(novoJogador);
     } catch (error) {
-        res.status(400).json({message: "Dados inválidos", erros: error});
+        return res.status(400).json({message: "Dados inválidos", erros: error});
     }
 }
 
@@ -87,8 +87,8 @@ export const atualizarModerador = (req: Request, res: Response) => {
     try {
         const data = edtModeracaoJogadorSchema.parse(req.body);
         const jogadorAtualizado = jogadorService.atualizarModeracao(idParaAtualizar, data);
-        res.status(200).json(jogadorAtualizado);
+        return res.status(200).json(jogadorAtualizado);
     } catch (error) {
-        res.status(400).json({message: "Dados inválidos", erros: error});
+        return res.status(400).json({message: "Dados inválidos", erros: error});
     }
 }
