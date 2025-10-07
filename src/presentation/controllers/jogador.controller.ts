@@ -46,9 +46,7 @@ export const deletar = (req: Request, res: Response) => {
     }
     
     jogadorService.excluirJogador(idParaDeletar);
-    console.log(`Jogador com id ${idParaDeletar} deletado`);
-
-    res.status(204).send();
+    return res.status(204).json({message: `Jogador com id ${idParaDeletar} deletado`});
 }
 
 export const atualizarDados = (req: Request, res: Response) => {
