@@ -1,5 +1,5 @@
 import { Router } from "express";
-import * as conviteController from '../controllers/convite.controller.js';
+import { conviteController } from "../controllers/convite.controller.js";
 
 const router = Router();
 
