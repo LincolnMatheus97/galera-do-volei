@@ -58,7 +58,7 @@ export const conviteExiste = (id: number) => {
 
 export const excluirConvite = (id: number) => {
     const indexConvite = indexPorID(convites, id);   
-    convites.slice(indexConvite, 1);
+    convites.splice(indexConvite, 1);
 }
 
 export const aceitarConvite = (id: number) => {
@@ -76,19 +76,16 @@ export const aceitarConvite = (id: number) => {
         throw new Error("Partida não existe");
     }
 
-    if (convite.status === "pedente") {
-        convite.status = "aceita";
-
-        const novoParticipante = {
-            id_jogador: convite.destinatario.id_destinatario,
-            nome_jogador: convite.destinatario.nome_destinatario
-        }
-
-        partida.participantes.push(novoParticipante);
-        return true;
-    } else {
-        return false;
+    if (convite.status != "pendente") {
+        throw new Error('Convite já Aceito/Rejeitado');
     }
+
+    convite.status = "aceita";
+    const novoParticipante = {
+        id_jogador: convite.destinatario.id_destinatario,
+        nome_jogador: convite.destinatario.nome_destinatario
+    }
+    partida.participantes.push(novoParticipante);
 }
 
 export const rejeitarConvite = (id: number) => {
@@ -106,10 +103,8 @@ export const rejeitarConvite = (id: number) => {
         throw new Error("Partida não existe");
     }
 
-    if (convite.status === "pedente") {
-        convite.status = "rejeitado";
-        return true;
-    } else {
-        return false;
+    if (convite.status != "pendente") {
+        throw new Error('Convite já Aceito/Rejeitado');
     }
+    convite.status = "rejeitado";
 }
