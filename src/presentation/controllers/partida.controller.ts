@@ -53,9 +53,7 @@ export const deletar = (req: Request, res: Response) => {
     }
 
     partidaServices.excluirPartida(idParaDeletar);
-    console.log(`Jogador com id ${idParaDeletar} deletado`);
-
-    res.status(204).send();
+    return res.status(204).send();
 }
 
 export const atualizarDados = (req: Request, res: Response) => {
@@ -86,6 +84,11 @@ export const listarInscricoes = (req: Request, res: Response) => {
     if (isNaN(idParaListar)) {
         return res.status(400).json({message: "ID inválido. Por favor digite um ID válido"});
     }
+
+    if (!partidaServices.partidaExiste(idParaListar)) {
+        return res.status(404).json({message: "Partida não existe!"});
+    }
+
     const todasAsInscricoes = partidaServices.listarInscricoes(idParaListar);
     res.status(200).json(todasAsInscricoes);
 }
@@ -123,10 +126,11 @@ export const aceitarInscricao = (req: Request, res: Response) => {
         return res.status(404).json({message: "Partida não existe!"});
     }
 
-    if (partidaServices.aceitarInscricao(idParaAceitar)) {
-        res.status(200).json({ message: `Jogador aceito na partida!` });
-    } else {
-        res.status(400).json({message: "Dados inválidos"});
+    try {
+        partidaServices.aceitarInscricao(idParaAceitar);
+        return res.status(200).json({message: 'Inscrição Aceita'});
+    } catch (error) {
+        res.status(400).json({message: "Dados inválidos", erros: error});
     }
 }
 
@@ -142,10 +146,11 @@ export const recusarInscricao = (req: Request, res: Response) => {
         return res.status(404).json({message: "Partida não existe!"});
     }
 
-    if (partidaServices.recusarInscricao(idParaAceitar)) {
+    try {
+        partidaServices.recusarInscricao(idParaAceitar)
         res.status(200).json({ message: `Jogador foi recusado na partida!` });
-    } else {
-        res.status(400).json({message: "Dados inválidos"});
+    } catch (error) {
+        res.status(400).json({message: "Dados inválidos", erros: error});
     }
 }
 
