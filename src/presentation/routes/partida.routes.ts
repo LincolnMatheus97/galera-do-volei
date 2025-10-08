@@ -1,5 +1,5 @@
 import { Router } from "express";
-import * as partidaController from '../controllers/partida.controller.js';
+import { partidaController } from "../controllers/partida.controller.js";
 
 const router = Router();
 
