@@ -1,8 +1,6 @@
-import { error } from "console";
 import type { Partida, Jogador, Inscricao } from "../../main/index.model.js";
 import { indexPorID, indexPorNome } from "../../utils/utils.js";
 import { jogadores } from "./jogador.service.js";
-import { number } from "zod";
 
 export let partidas: Partida[] = [
     {
@@ -57,7 +55,7 @@ export const partidaExiste = (id: number) => {
 
 export const excluirPartida = (id: number) => {
     const partidaIndex = indexPorID(partidas, id);
-    partidas.slice(partidaIndex, 1);
+    partidas.splice(partidaIndex, 1);
 }
 
 export const atualizarDados = (id: number, data: Omit<Partida, 'id' | 'tipo' | 'data' | 'moderador' | 'participantes' | 'inscricoes' | 'avaliacoes'>) => {
@@ -118,19 +116,16 @@ export const aceitarInscricao = (id: number) => {
         }
     }
 
-    if (inscricao && inscricao.status === 'pendente') {
-        inscricao.status = 'aceita';
-
-        const novoParticipante = {
-            id_jogador: inscricao.id_jogador,
-            nome_jogador: inscricao.nome_jogador
-        }
-
-        partidaDaInscricao?.participantes.push(novoParticipante);
-        return true;
-    } else {
-        return false;
+    if (!inscricao || inscricao.status !== 'pendente' || partidaDaInscricao?.situacao !== 'Aberta') {
+        throw new Error("Inscrição não encontrada, já aceita/rejeitada ou partida não está aberta.");
     }
+
+    inscricao.status = 'aceita';
+    const novoParticipante = {
+        id_jogador: inscricao.id_jogador,
+        nome_jogador: inscricao.nome_jogador
+    }
+    partidaDaInscricao?.participantes.push(novoParticipante);
 }
 
 export const recusarInscricao = (id: number) => {
@@ -145,12 +140,10 @@ export const recusarInscricao = (id: number) => {
         }
     }
 
-    if (inscricao && inscricao.status === "pendente") {
-        inscricao.status = 'rejeitada';
-        return true;
-    } else {
-        return false;
+    if (!inscricao || inscricao.status != "pendente") {
+        throw new Error('Incrição não encontrada,já aceita/rejeitada');
     }
+    inscricao.status = 'rejeitada';
 }
 
 export const adicionarAvaliacao = (id: number, nota: number, comentario: string,dataJogador: Omit<Jogador, 'id' | 'moderador' | 'sexo' | 'categoria'>) => {
