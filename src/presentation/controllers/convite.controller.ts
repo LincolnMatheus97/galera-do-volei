@@ -50,10 +50,11 @@ export const aceitar = (req: Request, res: Response) => {
         return res.status(404).json({message: "Convite não existe!"});
     }
 
-    if (conviteServices.aceitarConvite(idParaAceitar)) {
+    try {
+        conviteServices.aceitarConvite(idParaAceitar)
         res.status(200).json({ message: `Jogador aceito na partida!` });
-    } else {
-        res.status(400).json({message: "Dados inválidos"});
+    } catch (error) {
+        return res.status(400).json({message: "Dados inválidos", erros: error});
     }
 }
 
@@ -69,9 +70,10 @@ export const recusar = (req: Request, res: Response) => {
         return res.status(404).json({message: "Convite não existe!"});
     }
 
-    if (conviteServices.rejeitarConvite(idParaAceitar)) {
+    try {
+        conviteServices.rejeitarConvite(idParaAceitar)
         res.status(200).json({ message: `Jogador rejeitado na partida!` });
-    } else {
-        res.status(400).json({message: "Dados inválidos"});
+    } catch (error) {
+        return res.status(400).json({message: "Dados inválidos", erros: error});
     }
 }
