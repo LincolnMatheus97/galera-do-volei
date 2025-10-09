@@ -1,22 +1,22 @@
 import { type Request, type Response } from 'express';
 import z from 'zod';
 import { jogadorService } from '../../application/service/jogador.service.js';
-import { HttpException } from '../middleware/HttpException.middleware.js';
+import { HttpException } from '../middleware/httpException.middleware.js';
 
-const criarJogadorSchema = z.object({
+export const criarJogadorSchema = z.object({
     nome: z.string().min(3, { message: "O nome é obrigatório e deve ter ao menos 3 caracteres." }),
     sexo: z.string({ message: "O sexo é obrigatório." }),
     categoria: z.string({ message: "A categoria é obrigatória." })
 });
 
-const edtDadosBasicosJogadorSchema = z.object({
+export const edtDadosBasicosJogadorSchema = z.object({
     nome: z.string().min(3).optional(),
     sexo: z.string().optional(),
     categoria: z.string().optional()
 });
 
-const edtModeracaoJogadorSchema = z.object({
-    moderador: z.boolean()
+export const edtModeracaoJogadorSchema = z.object({
+    moderador: z.boolean({ message: "O estado de moderação é obrigatorio, sendo apenas verdadeiro ou falso" })
 });
 
 class JogadorController {
@@ -26,8 +26,7 @@ class JogadorController {
     }
 
     async criar(req: Request, res: Response) {
-        const data = criarJogadorSchema.parse(req.body);
-        const novoJogador = await jogadorService.criarJogador(data);
+        const novoJogador = await jogadorService.criarJogador(req.body);
         return res.status(201).json(novoJogador);
     }
 
@@ -51,8 +50,7 @@ class JogadorController {
             throw new HttpException("ID inválido. Por favor digite um ID válido", 400);
         }
 
-        const data = edtDadosBasicosJogadorSchema.parse(req.body);
-        const jogadorAtualizado = await jogadorService.atualizarDados(idParaAtualizar, data);
+        const jogadorAtualizado = await jogadorService.atualizarDados(idParaAtualizar, req.body);
         return res.status(200).json(jogadorAtualizado);
     }
 
@@ -64,8 +62,7 @@ class JogadorController {
             throw new HttpException("ID inválido. Por favor digite um ID válido", 400);
         }
 
-        const data = edtModeracaoJogadorSchema.parse(req.body);
-        const jogadorAtualizado = await jogadorService.atualizarModeracao(idParaAtualizar, data);
+        const jogadorAtualizado = await jogadorService.atualizarModeracao(idParaAtualizar, req.body);
         return res.status(200).json(jogadorAtualizado);
     }
 }
