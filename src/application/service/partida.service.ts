@@ -1,7 +1,9 @@
-import type { Partida, Jogador, Inscricao, Avaliacao} from "../../main/index.model.js";
+import type { Partida, Jogador, Inscricao, Avaliacao } from "../../main/index.model.js";
+import { NotFoundErro } from "../errors/NotFoundErro.errors.js";
+import { NotAllowed } from "../errors/NotAllowed.errors.js";
 import { jogadorService } from "./jogador.service.js";
 
-const jogadores: Array<Jogador> = await jogadorService.listarJogadores(); 
+const jogadores: Array<Jogador> = await jogadorService.listarJogadores();
 
 class PartidaService {
     private partidas: Partida[] = [
@@ -33,7 +35,7 @@ class PartidaService {
         const jogadorIndex = this.indexPorNome(dataJogador.nome);
 
         if (jogadorIndex === -1 || jogadores[jogadorIndex]?.id === undefined) {
-            throw new Error("Moderador não encontrado ou ID inválido.");
+            throw new NotFoundErro("Moderador não encontrado ou ID inválido.");
         }
 
         const novaPartida = {
@@ -83,23 +85,23 @@ class PartidaService {
         return Promise.resolve(this.partidas[partidaIndex]?.inscricoes);
     }
 
-    async adicionarInscricao(id: number, dataJogador: Pick<Jogador, 'nome'>): Promise<Inscricao | null>{
+    async adicionarInscricao(id: number, dataJogador: Pick<Jogador, 'nome'>): Promise<Inscricao | null> {
         const partidaIndex = this.indexPorID(id);
         const partida = this.partidas[partidaIndex];
 
         if (!partida) {
-            throw new Error("Partida não encontrada");
+            throw new NotFoundErro("Partida não encontrada");
         }
 
         if (partida.situacao === "fechado") {
-            throw new Error("Partida já fechada");
+            throw new NotAllowed("Partida já fechada");
         }
 
         const jogadorIndex = this.indexPorNome(dataJogador.nome);
         const idJogador = jogadores[jogadorIndex]?.id;
-        
-        if (typeof(idJogador) != "number") {
-            throw new Error('ID de jogador não existente');
+
+        if (typeof (idJogador) != "number") {
+            throw new NotFoundErro('ID de jogador não existente');
         }
 
         const novaInscricao = {
@@ -128,8 +130,12 @@ class PartidaService {
             }
         }
 
-        if (!inscricao || inscricao.status !== 'pendente' || partidaDaInscricao?.situacao !== 'Aberta') {
-            throw new Error("Inscrição não encontrada, já aceita/rejeitada ou partida não está aberta.");
+        if (!inscricao) {
+            throw new NotFoundErro("Inscrição não encontrada.");
+        }
+
+        if (inscricao.status !== 'pendente' || partidaDaInscricao?.situacao !== 'Aberta') {
+            throw new NotAllowed("Inscrição já aceita/rejeitada ou partida não está aberta.");
         }
 
         inscricao.status = 'aceita';
@@ -154,8 +160,13 @@ class PartidaService {
         }
 
         if (!inscricao || inscricao.status != "pendente") {
-            throw new Error('Incrição não encontrada,já aceita/rejeitada');
+            throw new NotFoundErro('Incrição não encontrada,já aceita/rejeitada');
         }
+
+        if (inscricao.status != "pendente") {
+            throw new NotAllowed('Incrição já aceita/rejeitada')
+        }
+
         inscricao.status = 'rejeitada';
         return Promise.resolve();
     }
@@ -169,7 +180,7 @@ class PartidaService {
         const jaParticipa = partida?.participantes.some(part => part.nome_jogador === dataJogador.nome);
 
         if (typeof idJogador !== "number" || !jaParticipa) {
-        throw new Error("Jogador não encontrado");
+            throw new NotFoundErro("Jogador não encontrado");
         }
 
         const novaAvaliacao = {

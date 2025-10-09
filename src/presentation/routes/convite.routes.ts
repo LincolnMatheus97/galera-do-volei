@@ -1,12 +1,13 @@
 import { Router } from "express";
 import { conviteController } from "../controllers/convite.controller.js";
+import { authMiddleware } from "../middleware/auth.middleware.js";
 
 const router = Router();
 
 router.get('/convites', conviteController.listar);
-router.post('/convites', conviteController.criar);
-router.delete('/convites/:id', conviteController.excluir);
-router.post('/convites/:id/aceitar', conviteController.aceitar);
-router.post('/convites/:id/rejeitar', conviteController.recusar);
+router.post('/convites', authMiddleware, conviteController.criar);
+router.delete('/convites/:id', authMiddleware, conviteController.excluir);
+router.post('/convites/:id/aceitar', authMiddleware, conviteController.aceitar);
+router.post('/convites/:id/rejeitar', authMiddleware, conviteController.recusar);
 
 export default router;

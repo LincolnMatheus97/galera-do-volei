@@ -1,6 +1,7 @@
 import { type Request, type Response } from 'express';
 import z from 'zod';
 import { jogadorService } from '../../application/service/jogador.service.js';
+import { HttpException } from '../middleware/HttpException.middleware.js';
 
 const criarJogadorSchema = z.object({
     nome: z.string().min(3, { message: "O nome é obrigatório e deve ter ao menos 3 caracteres." }),
@@ -25,13 +26,9 @@ class JogadorController {
     }
 
     async criar(req: Request, res: Response) {
-        try {
-            const data = criarJogadorSchema.parse(req.body);
-            const novoJogador = await jogadorService.criarJogador(data);
-            return res.status(201).json(novoJogador);
-        } catch (error) {
-            return res.status(400).json({message: "Dados inválidos", erros: error});
-        }
+        const data = criarJogadorSchema.parse(req.body);
+        const novoJogador = await jogadorService.criarJogador(data);
+        return res.status(201).json(novoJogador);
     }
 
     async deletar(req: Request, res: Response) {
@@ -39,13 +36,9 @@ class JogadorController {
         const idParaDeletar = parseInt(idParam, 10);
 
         if (isNaN(idParaDeletar)) {
-            return res.status(400).json({message: "ID inválido. Por favor digite um ID válido"});
+            throw new HttpException("ID inválido. Por favor digite um ID válido", 400);
         }
 
-        if (!await jogadorService.jogadorExiste(idParaDeletar)) {
-            return res.status(404).json({message: "Jogador não encontrado!"});
-        }
-        
         await jogadorService.excluirJogador(idParaDeletar);
         return res.status(204).send();
     }
@@ -55,20 +48,12 @@ class JogadorController {
         const idParaAtualizar = parseInt(idParam, 10);
 
         if (isNaN(idParaAtualizar)) {
-            return res.status(400).json({message: "ID inválido. Por favor digite um ID válido"});
+            throw new HttpException("ID inválido. Por favor digite um ID válido", 400);
         }
 
-        if (!await jogadorService.jogadorExiste(idParaAtualizar)) {
-            return res.status(404).json({message: "Jogador não encontrado!"});
-        }
-        
-        try {
-            const data = edtDadosBasicosJogadorSchema.parse(req.body);
-            const jogadorAtualizado = await jogadorService.atualizarDados(idParaAtualizar, data);
-            res.status(200).json(jogadorAtualizado);
-        } catch (error) {
-            res.status(400).json({message: "Dados inválidos", erros: error});
-        }
+        const data = edtDadosBasicosJogadorSchema.parse(req.body);
+        const jogadorAtualizado = await jogadorService.atualizarDados(idParaAtualizar, data);
+        return res.status(200).json(jogadorAtualizado);
     }
 
     async atualizarModerador(req: Request, res: Response) {
@@ -76,20 +61,12 @@ class JogadorController {
         const idParaAtualizar = parseInt(idParam, 10);
 
         if (isNaN(idParaAtualizar)) {
-            return res.status(400).json({message: "ID inválido. Por favor digite um ID válido"});
+            throw new HttpException("ID inválido. Por favor digite um ID válido", 400);
         }
 
-        if (!await jogadorService.jogadorExiste(idParaAtualizar)) {
-            return res.status(404).json({message: "Jogador não encontrado!"});
-        }
-        
-        try {
-            const data = edtModeracaoJogadorSchema.parse(req.body);
-            const jogadorAtualizado = await jogadorService.atualizarModeracao(idParaAtualizar, data);
-            return res.status(200).json(jogadorAtualizado);
-        } catch (error) {
-            return res.status(400).json({message: "Dados inválidos", erros: error});
-        }
+        const data = edtModeracaoJogadorSchema.parse(req.body);
+        const jogadorAtualizado = await jogadorService.atualizarModeracao(idParaAtualizar, data);
+        return res.status(200).json(jogadorAtualizado);
     }
 }
 
