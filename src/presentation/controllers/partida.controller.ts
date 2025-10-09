@@ -1,25 +1,25 @@
 import { type Request, type Response } from 'express';
 import z from 'zod';
 import { partidaService } from '../../application/service/partida.service.js';
-import { HttpException } from '../middleware/HttpException.middleware.js';
+import { HttpException } from '../middleware/httpException.middleware.js';
 
-const criarPartidaSchema = z.object({
-    tipo: z.string(),
-    nome_moderador: z.string()
+export const criarPartidaSchema = z.object({
+    tipo: z.string({ message: "O tipo da partida é obrigatória." }),
+    nome_moderador: z.string({ message: "O nome do moderador é obrigatório." })
 });
 
-const edtDadosBasicosPartidaSchema = z.object({
-    situacao: z.string()
+export const edtDadosBasicosPartidaSchema = z.object({
+    situacao: z.string({ message: "A situação da partida é obrigatória." })
 });
 
-const addInscricaoPartidaSchema = z.object({
-    nome_jogador: z.string()
+export const addInscricaoPartidaSchema = z.object({
+    nome_jogador: z.string({ message: "O nome do jogador é obrigatório para inscrição." })
 });
 
-const addAvaliacaoSchema = z.object({
-    nome_jogador: z.string(),
-    nota: z.number().min(0).max(10),
-    comentario: z.string()
+export const addAvaliacaoSchema = z.object({
+    nome_jogador: z.string({ message: "O nome do jogador é obrigatório para avaliação." }),
+    nota: z.number({ message: "A nota é do jogador é obrigatório para avaliação." }).min(0).max(10), 
+    comentario: z.string({ message: "O comentario do jogador é obrigatório para avaliação." })
 });
 
 class PartidaController {
@@ -29,8 +29,7 @@ class PartidaController {
     }
 
     async criarPartida(req: Request, res: Response) {
-        const data = criarPartidaSchema.parse(req.body);
-        const novaPartida = await partidaService.criarPartida({ nome: data.nome_moderador }, { tipo: data.tipo });
+        const novaPartida = await partidaService.criarPartida({ nome: req.body.nome_moderador }, { tipo: req.body.tipo });
         res.status(201).json(novaPartida);
     }
 
@@ -54,8 +53,7 @@ class PartidaController {
             throw new HttpException("ID inválido. Por favor digite um ID válido", 400);
         }
 
-        const data = edtDadosBasicosPartidaSchema.parse(req.body);
-        const partidaAtualizada = await partidaService.atualizarDados(idParaAtualizar, { situacao: data.situacao });
+        const partidaAtualizada = await partidaService.atualizarDados(idParaAtualizar, { situacao: req.body.situacao });
         return res.status(200).json(partidaAtualizada);
     }
 
@@ -79,8 +77,7 @@ class PartidaController {
             throw new HttpException("ID inválido. Por favor digite um ID válido", 400);
         }
 
-        const data = addInscricaoPartidaSchema.parse(req.body);
-        const novaInscricao = await partidaService.adicionarInscricao(idParaAdd, { nome: data.nome_jogador });
+        const novaInscricao = await partidaService.adicionarInscricao(idParaAdd, { nome: req.body.nome_jogador });
         return res.status(200).json(novaInscricao);
     }
 
@@ -116,8 +113,7 @@ class PartidaController {
             throw new HttpException("ID inválido. Por favor digite um ID válido", 400);
         }
 
-        const data = addAvaliacaoSchema.parse(req.body);
-        const novaAvaliacao = await partidaService.adicionarAvaliacao(idParaAdd, data.nota, data.comentario, { nome: data.nome_jogador });
+        const novaAvaliacao = await partidaService.adicionarAvaliacao(idParaAdd, req.body.nota, req.body.comentario, { nome: req.body.nome_jogador });
         res.status(201).json(novaAvaliacao);
     }
 }
