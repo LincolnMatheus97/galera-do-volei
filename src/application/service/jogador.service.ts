@@ -17,7 +17,7 @@ class JogadorService {
 
     async criarJogador(data: Omit<Jogador, 'id' | 'moderador'>): Promise<Jogador> {
         const novoJogador = {
-            id: (this.jogadores.length > 0 ? Math.min(...this.jogadores.map(jog => jog.id)) + 1 : 1),
+            id: (this.jogadores.length > 0 ? this.jogadores.length + 1 : 1),
             nome: data.nome,
             moderador: false,
             sexo: data.sexo,
