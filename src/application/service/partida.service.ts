@@ -160,7 +160,7 @@ class PartidaService {
         }
 
         if (!inscricao || inscricao.status != "pendente") {
-            throw new NotFoundErro('Incrição não encontrada,já aceita/rejeitada');
+            throw new NotFoundErro('Incrição não encontrada.');
         }
 
         if (inscricao.status != "pendente") {
