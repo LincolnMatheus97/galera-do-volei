@@ -41,7 +41,7 @@ class ConviteService {
         const indexPartida = partidas.findIndex(mod => mod.moderador.nome_moderador === dataRemetente.nome);
 
         if (indexPartida === -1) {
-            throw new NotAllowed("Partida não encontrada");
+            throw new NotFoundErro("Partida não encontrada");
         }
 
         const novoConvite = {
