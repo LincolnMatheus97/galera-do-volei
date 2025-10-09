@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-import { HttpException } from "./HttpException.middleware.js";
+import { HttpException } from "./httpException.middleware.js";
 
 const token = 'volei123';
 

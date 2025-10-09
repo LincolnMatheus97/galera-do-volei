@@ -1,11 +1,11 @@
 import type { Request, Response } from "express";
 import z from "zod";
 import { conviteService } from "../../application/service/convite.service.js";
-import { HttpException } from "../middleware/HttpException.middleware.js";
+import { HttpException } from "../middleware/httpException.middleware.js";
 
-const criarConviteSchema = z.object({
-    nome_remetente: z.string(),
-    nome_destinatario: z.string()
+export const criarConviteSchema = z.object({
+    nome_remetente: z.string({message: 'Nome do remetente do convite é obrigatorio.'}),
+    nome_destinatario: z.string({message: 'Nome do destinatario do convite é obrigatorio.'})
 });
 
 class ConviteController {
@@ -15,12 +15,11 @@ class ConviteController {
     }
 
     async criar(req: Request, res: Response) {
-        const data = criarConviteSchema.parse(req.body);
-        const novoConvite = await conviteService.criarConvite({nome: data.nome_remetente}, {nome: data.nome_destinatario});
+        const novoConvite = await conviteService.criarConvite({ nome: req.body.nome_remetente }, { nome: req.body.nome_destinatario });
         return res.status(201).json(novoConvite);
     }
 
-    async excluir (req: Request, res: Response) {
+    async excluir(req: Request, res: Response) {
         const idParam = req.params.id ?? '';
         const idParaDeletar = parseInt(idParam, 10);
 
@@ -29,10 +28,10 @@ class ConviteController {
         }
 
         await conviteService.excluirConvite(idParaDeletar);
-        return res.status(204).json({message: `Convite de id ${idParaDeletar} excluído com sucesso`});
+        return res.status(204).json({ message: `Convite de id ${idParaDeletar} excluído com sucesso` });
     }
 
-    async aceitar (req: Request, res: Response) {
+    async aceitar(req: Request, res: Response) {
         const idParam = req.params.id ?? '';
         const idParaAceitar = parseInt(idParam, 10);
 
@@ -44,7 +43,7 @@ class ConviteController {
         return res.status(200).json({ message: `Jogador aceito na partida!` });
     }
 
-    async recusar (req: Request, res: Response) {
+    async recusar(req: Request, res: Response) {
         const idParam = req.params.id ?? '';
         const idParaAceitar = parseInt(idParam, 10);
 
