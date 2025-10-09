@@ -1,4 +1,6 @@
 import type { Jogador, Convite, Partida } from "../../main/index.model.js";
+import { NotFoundErro } from "../errors/NotFoundErro.errors.js";
+import { NotAllowed } from "../errors/NotAllowed.errors.js";
 import { jogadorService } from "./jogador.service.js";
 import { partidaService } from "./partida.service.js";
 
@@ -7,15 +9,17 @@ const partidas: Array<Partida> = await partidaService.listarPartidas();
 
 class ConviteService {
     private convites: Convite[] = [
-        { id: 1, status: "pendente", remetente: {id_remetente: 1, nome_remetente: "Thalisson"}, 
-        destinatario: {id_destinatario: 2, nome_destinatario: "Natiele"}, id_partida: 1}
+        {
+            id: 1, status: "pendente", remetente: { id_remetente: 1, nome_remetente: "Thalisson" },
+            destinatario: { id_destinatario: 2, nome_destinatario: "Natiele" }, id_partida: 1
+        }
     ];
 
-    private indexPorID(lista: {id: number}[], id: number): number {
+    private indexPorID(lista: { id: number }[], id: number): number {
         return lista.findIndex(entid => entid.id === id);
     }
 
-    private indexPorNome(nome: string):number {
+    private indexPorNome(nome: string): number {
         return jogadores.findIndex(jog => jog.nome === nome);
     }
 
@@ -24,20 +28,20 @@ class ConviteService {
     }
 
     async criarConvite(
-        dataRemetente: Omit<Jogador, 'id' | 'moderador' | 'sexo' | 'categoria'>, 
+        dataRemetente: Omit<Jogador, 'id' | 'moderador' | 'sexo' | 'categoria'>,
         dataDestinatario: Omit<Jogador, 'id' | 'moderador' | 'sexo' | 'categoria'>,
     ): Promise<Convite | null> {
         const indexRemetente = this.indexPorNome(dataRemetente.nome);
         const indexDestinatario = this.indexPorNome(dataDestinatario.nome);
 
         if (jogadores[indexRemetente]?.id === undefined || jogadores[indexDestinatario]?.id === undefined) {
-            throw new Error("Jogadores não encontrados");
+            throw new NotFoundErro("Jogadores não encontrados");
         }
 
         const indexPartida = partidas.findIndex(mod => mod.moderador.nome_moderador === dataRemetente.nome);
 
         if (indexPartida === -1) {
-            throw new Error("Partida não encontrada");
+            throw new NotAllowed("Partida não encontrada");
         }
 
         const novoConvite = {
@@ -57,13 +61,13 @@ class ConviteService {
         return Promise.resolve(novoConvite);
     }
 
-    async conviteExiste(id: number): Promise<boolean>{
+    async conviteExiste(id: number): Promise<boolean> {
         const indexConvite = this.indexPorID(this.convites, id);
         return Promise.resolve(indexConvite != -1);
     }
 
-    async excluirConvite(id: number): Promise<void>{
-        const indexConvite = this.indexPorID(this.convites, id);   
+    async excluirConvite(id: number): Promise<void> {
+        const indexConvite = this.indexPorID(this.convites, id);
         if (indexConvite > -1) {
             this.convites.splice(indexConvite, 1);
         }
@@ -75,18 +79,18 @@ class ConviteService {
         const convite = this.convites[indexConvite];
 
         if (!convite) {
-            throw new Error("Convite não existe");
+            throw new NotFoundErro("Convite não existe");
         }
 
         const partidaDoConvite = this.indexPorID(partidas, convite.id);
         const partida = partidas[partidaDoConvite];
 
         if (!partida) {
-            throw new Error("Partida não existe");
+            throw new NotFoundErro("Partida não existe");
         }
 
         if (convite.status != "pendente") {
-            throw new Error('Convite já Aceito/Rejeitado');
+            throw new NotAllowed('Convite já Aceito/Rejeitado');
         }
 
         convite.status = "aceita";
@@ -103,18 +107,18 @@ class ConviteService {
         const convite = this.convites[indexConvite];
 
         if (!convite) {
-            throw new Error("Convite não existe");
+            throw new NotFoundErro("Convite não existe");
         }
 
         const partidaDoConvite = this.indexPorID(partidas, convite.id);
         const partida = partidas[partidaDoConvite];
 
         if (!partida) {
-            throw new Error("Partida não existe");
+            throw new NotFoundErro("Partida não existe");
         }
 
         if (convite.status != "pendente") {
-            throw new Error('Convite já Aceito/Rejeitado');
+            throw new NotAllowed('Convite já Aceito/Rejeitado');
         }
         convite.status = "rejeitado";
         return Promise.resolve();
