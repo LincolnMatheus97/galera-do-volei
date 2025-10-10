@@ -68,10 +68,10 @@ class ConviteService {
 
     async excluirConvite(id: number): Promise<void> {
         const indexConvite = this.indexPorID(this.convites, id);
-        if (indexConvite > -1) {
-            this.convites.splice(indexConvite, 1);
+        if (indexConvite === -1) {
+            throw new NotFoundErro("Convite não existe");
         }
-        return Promise.resolve();
+        this.convites.splice(indexConvite, 1);
     }
 
     async aceitarConvite(id: number): Promise<void> {
