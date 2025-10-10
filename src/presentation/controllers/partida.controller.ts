@@ -18,7 +18,7 @@ export const addInscricaoPartidaSchema = z.object({
 
 export const addAvaliacaoSchema = z.object({
     nome_jogador: z.string({ message: "O nome do jogador é obrigatório para avaliação." }),
-    nota: z.number({ message: "A nota é do jogador é obrigatório para avaliação." }).min(0).max(10), 
+    nota: z.number({ message: "A nota é do jogador é obrigatório para avaliação." }).min(0).max(10),
     comentario: z.string({ message: "O comentario do jogador é obrigatório para avaliação." })
 });
 

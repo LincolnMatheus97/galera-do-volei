@@ -1,4 +1,6 @@
 import type { Jogador } from "../../main/index.model.js";
+import { ConflictError } from "../errors/ConflictError.errors.js";
+import { NotFoundErro } from "../errors/NotFoundErro.errors.js";
 
 class JogadorService {
     private jogadores: Jogador[] = [
@@ -16,9 +18,16 @@ class JogadorService {
     };
 
     async criarJogador(data: Omit<Jogador, 'id' | 'moderador'>): Promise<Jogador> {
+        const nomeNovoJogador = data.nome;
+        const jogador = this.jogadores.find(jog => jog.nome.toLowerCase() === nomeNovoJogador.toLowerCase());
+        
+        if (jogador) {
+            throw new ConflictError("Jogador já existe, não é possivel adicionar!");
+        }
+
         const novoJogador = {
             id: (this.jogadores.length > 0 ? this.jogadores.length + 1 : 1),
-            nome: data.nome,
+            nome: nomeNovoJogador,
             moderador: false,
             sexo: data.sexo,
             categoria: data.categoria
@@ -35,15 +44,15 @@ class JogadorService {
     async excluirJogador(id: number): Promise<void> {
         const jogadorIndex = this.indexPorID(id);
         if (jogadorIndex > -1) {
-            this.jogadores.splice(jogadorIndex, 1);
+            throw new NotFoundErro("Jogador não encontrado!");
         }
-        return Promise.resolve();
+        this.jogadores.splice(jogadorIndex, 1);
     }
 
-    async atualizarDados(id: number, data: Partial<Omit<Jogador, 'id' | 'moderador'>>): Promise<Jogador | null> {
+    async atualizarDados(id: number, data: Partial<Omit<Jogador, 'id' | 'moderador'>>): Promise<Jogador> {
         const jogadorIndex = this.indexPorID(id);
         if(jogadorIndex === -1) {
-            return Promise.resolve(null);
+            throw new NotFoundErro("Jogador não encontrado!");
         }
 
         const jogadorAtualizado = this.jogadores[jogadorIndex]!;
@@ -53,10 +62,10 @@ class JogadorService {
         return Promise.resolve(jogadorAtualizado);
     }
 
-    async atualizarModeracao(id: number, data: Pick<Jogador, 'moderador'>): Promise<Jogador | null> {
+    async atualizarModeracao(id: number, data: Pick<Jogador, 'moderador'>): Promise<Jogador> {
         const jogadorIndex = this.indexPorID(id);
         if (jogadorIndex === -1) {
-            return Promise.resolve(null);
+            throw new NotFoundErro("Jogador não encontrado!");
         }
 
         const jogadorAtualizado = this.jogadores[jogadorIndex]!;
