@@ -2,6 +2,7 @@ import type { Partida, Jogador, Inscricao, Avaliacao } from "../../main/index.mo
 import { NotFoundErro } from "../errors/NotFoundErro.errors.js";
 import { NotAllowed } from "../errors/NotAllowed.errors.js";
 import { jogadorService } from "./jogador.service.js";
+import { ConflictError } from "../errors/ConflictError.errors.js";
 
 const jogadores: Array<Jogador> = await jogadorService.listarJogadores();
 
@@ -62,17 +63,18 @@ class PartidaService {
 
     async excluirPartida(id: number): Promise<void> {
         const partidaIndex = this.indexPorID(id);
-        if (partidaIndex > -1) {
-            this.partidas.splice(partidaIndex, 1);
+        if (partidaIndex === -1) {
+            throw new ConflictError("Partida não encontrada!");
         }
-        return Promise.resolve();
+        
+        this.partidas.splice(partidaIndex, 1);
     }
 
-    async atualizarDados(id: number, data: Pick<Partida, 'situacao'>): Promise<Partida | null> {
+    async atualizarDados(id: number, data: Pick<Partida, 'situacao'>): Promise<Partida> {
         const partidaIndex = this.indexPorID(id);
 
         if (partidaIndex === -1) {
-            return Promise.resolve(null);
+            throw new NotFoundErro("Partida não encontrada!");
         }
 
         const partidaAtualizada = this.partidas[partidaIndex]!;
@@ -82,10 +84,15 @@ class PartidaService {
 
     async listarInscricoes(id: number): Promise<Inscricao[] | undefined> {
         const partidaIndex = this.indexPorID(id);
+
+        if (partidaIndex === -1) {
+            throw new NotFoundErro("Partida não encontrada!");
+        }
+
         return Promise.resolve(this.partidas[partidaIndex]?.inscricoes);
     }
 
-    async adicionarInscricao(id: number, dataJogador: Pick<Jogador, 'nome'>): Promise<Inscricao | null> {
+    async adicionarInscricao(id: number, dataJogador: Pick<Jogador, 'nome'>): Promise<Inscricao> {
         const partidaIndex = this.indexPorID(id);
         const partida = this.partidas[partidaIndex];
 
