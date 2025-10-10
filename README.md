@@ -36,9 +36,9 @@ A refatoração foi guiada pelos seguintes princípios e padrões de arquitetura
 A aplicação agora está organizada na seguinte estrutura de camadas:
 
 * #### `presentation` (Camada de Apresentação e Infraestrutura Web)
-    * **`routes`**: Define os endpoints da API e os verbos HTTP, conectando uma URL a um método de controller.
-    * **`controllers`**: Responsáveis por receber a requisição (`Request`) e devolver a resposta (`Response`). Eles orquestram o fluxo, validam os dados de entrada (usando Zod) e invocam os serviços da camada de aplicação.
-    * **`middleware`**: Funções que interceptam as requisições para executar lógicas centralizadas, como o `globalErrorMiddleware` que captura todos os erros da aplicação, o `logMiddleware` que registra as chamadas, e o `authMiddleware` que protege as rotas.
+    * **`routes`**: Define os endpoints da API e os verbos HTTP. É aqui que os middlewares de validação e autenticação são aplicados a rotas específicas.
+    * **`controllers`**: Responsáveis por receber a requisição (`Request`) e devolver a resposta (`Response`). Eles orquestram o fluxo, invocam o `Service` apropriado da camada de aplicação e formatam o retorno para o cliente, atuando após a passagem pelos middlewares.
+    * **`middleware`**: Funções que interceptam as requisições para executar lógicas centralizadas. Isso inclui a validação dos dados de entrada (usando **Zod**), autenticação (`authMiddleware`), logging (`logMiddleware`) e o tratamento global de erros (`globalErrorMiddleware`), mantendo os controllers limpos e focados em sua principal responsabilidade.
 
 * #### `application` (Camada de Aplicação)
     * **`service`**: O coração da aplicação. Contém a lógica de negócio e os casos de uso ("Criar um Jogador", "Aceitar um Convite"). Nesta versão, os serviços também gerenciam a persistência dos dados em memória.
