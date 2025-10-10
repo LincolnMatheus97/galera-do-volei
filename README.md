@@ -12,7 +12,7 @@ Esta seção documenta o processo de transformação da API, servindo como um es
 
 ### O Ponto de Partida: O Monólito
 
-A versão inicial da API foi desenvolvida em um único arquivo, `_index_monolitico.ts` (disponível na raiz deste projeto para fins históricos), junto a sua documentação que está no em `_README.md`. Este arquivo continha todas as responsabilidades da aplicação:
+A versão inicial da API foi desenvolvida em um único arquivo, **[_index_monolitico.ts](https://github.com/LincolnMatheus97/galera-do-volei/blob/main/src/_index_monolitico.ts)**, junto a sua documentação que está no **[_README.md](https://github.com/LincolnMatheus97/galera-do-volei/blob/main/_README.md)**. Este arquivo continha todas as responsabilidades da aplicação:
 
 * Configuração do servidor Express.
 * Definição de todas as rotas e endpoints.
