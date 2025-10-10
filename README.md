@@ -73,7 +73,7 @@ Siga os passos abaixo para executar a aplicação localmente.
 
 1.  **Clone o repositório:**
     ```bash
-    git clone https://[URL-DO-SEU-REPOSITORIO].git
+    git clone https://github.com/LincolnMatheus97/galera-do-volei.git
     cd galera-do-volei
     ```
 
