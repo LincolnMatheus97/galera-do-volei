@@ -4,8 +4,8 @@ import { conviteService } from "../../application/service/convite.service.js";
 import { HttpException } from "../middleware/httpException.middleware.js";
 
 export const criarConviteSchema = z.object({
-    nome_remetente: z.string({message: 'Nome do remetente do convite é obrigatorio.'}),
-    nome_destinatario: z.string({message: 'Nome do destinatario do convite é obrigatorio.'})
+    nome_remetente: z.string({ message: 'Nome do remetente do convite é obrigatorio.' }),
+    nome_destinatario: z.string({ message: 'Nome do destinatario do convite é obrigatorio.' })
 });
 
 class ConviteController {
