@@ -1,0 +1,146 @@
+// Este arquivo define suas tabelas no banco de dados
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// --- TABELAS ---
+
+model Jogador {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  email     String   @unique
+  senhaHash String   
+  
+  sexo      String
+  categoria String
+  moderador Boolean  @default(false)
+  
+  partidasCriadas   Partida[]   @relation("ModeradorPartida")
+  inscricoes        Inscricao[]
+  
+  // Convites
+  convitesEnviados  Convite[]   @relation("Remetente")
+  convitesRecebidos Convite[]   @relation("Destinatario")
+  
+  // Avaliações
+  avaliacoesFeitas  Avaliacao[]
+
+  // --- SOCIAL ---
+  amigosSolicitados Amizade[] @relation("Solicitante")
+  amigosRecebidos   Amizade[] @relation("AmigoDestinatario")
+  
+  mensagensEnviadas Mensagem[] @relation("MsgRemetente")
+  mensagensRecebidas Mensagem[] @relation("MsgDestinatario")
+
+  @@map("jogadores")
+}
+
+model Partida {
+  id          Int      @id @default(autoincrement())
+  titulo      String   @default("Partida de Vôlei") 
+  descricao   String?
+  tipo        String   
+  data        DateTime
+  local       String?
+  situacao    String   @default("Aberta") 
+  
+  // EventSync
+  preco       Float    @default(0.0)
+  pixChave    String?
+  limiteCheckin Int    @default(1)
+  
+  moderadorId Int
+  moderador   Jogador  @relation("ModeradorPartida", fields: [moderadorId], references: [id])
+  
+  inscricoes  Inscricao[]
+  convites    Convite[]
+  avaliacoes  Avaliacao[]
+
+  @@map("partidas")
+}
+
+model Inscricao {
+  id        Int      @id @default(autoincrement())
+  status    String   @default("pendente") // pendente, aceita, recusada, confirmada (pago)
+  data      DateTime @default(now())
+  
+  // EventSync
+  qrCode    String?  @unique // Hash para o cartão
+  checkInCount Int   @default(0)
+  statusPagamento String @default("aguardando") // aguardando, pago, gratis
+  
+  jogadorId Int
+  jogador   Jogador  @relation(fields: [jogadorId], references: [id])
+  
+  partidaId Int
+  partida   Partida  @relation(fields: [partidaId], references: [id])
+
+  @@map("inscricoes")
+}
+
+model Convite {
+  id             Int      @id @default(autoincrement())
+  status         String   @default("pendente")
+  
+  remetenteId    Int
+  remetente      Jogador  @relation("Remetente", fields: [remetenteId], references: [id])
+  
+  destinatarioId Int
+  destinatario   Jogador  @relation("Destinatario", fields: [destinatarioId], references: [id])
+  
+  partidaId      Int
+  partida        Partida  @relation(fields: [partidaId], references: [id])
+
+  @@map("convites")
+}
+
+model Avaliacao {
+  id         Int      @id @default(autoincrement())
+  nota       Int
+  comentario String
+  data       DateTime @default(now())
+  
+  jogadorId  Int
+  jogador    Jogador  @relation(fields: [jogadorId], references: [id])
+  
+  partidaId  Int
+  partida    Partida  @relation(fields: [partidaId], references: [id])
+
+  @@map("avaliacoes")
+}
+
+// --- TABELAS SOCIAL ---
+
+model Amizade {
+  id             Int      @id @default(autoincrement())
+  status         String   @default("pendente") // pendente, aceita
+  data           DateTime @default(now())
+
+  solicitanteId  Int
+  solicitante    Jogador  @relation("Solicitante", fields: [solicitanteId], references: [id])
+
+  destinatarioId Int
+  destinatario   Jogador  @relation("AmigoDestinatario", fields: [destinatarioId], references: [id])
+
+  @@unique([solicitanteId, destinatarioId]) // Não pode pedir amizade 2 vezes pra mesma pessoa
+  @@map("amizades")
+}
+
+model Mensagem {
+  id             Int      @id @default(autoincrement())
+  conteudo       String
+  data           DateTime @default(now())
+
+  remetenteId    Int
+  remetente      Jogador  @relation("MsgRemetente", fields: [remetenteId], references: [id])
+
+  destinatarioId Int
+  destinatario   Jogador  @relation("MsgDestinatario", fields: [destinatarioId], references: [id])
+
+  @@map("mensagens")
+}

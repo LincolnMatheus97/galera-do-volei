@@ -1,206 +1,142 @@
-import type { Partida, Jogador, Inscricao, Avaliacao } from "../../main/index.model.js";
-import { NotFoundErro } from "../errors/NotFoundErro.errors.js";
-import { NotAllowed } from "../errors/NotAllowed.errors.js";
-import { jogadorService } from "./jogador.service.js";
-import { ConflictError } from "../errors/ConflictError.errors.js";
+import { NotFoundErro } from "../../shared/errors/NotFoundErro.errors.js";
+import { NotAllowed } from "../../shared/errors/NotAllowed.errors.js";
+import type { IPartidaRepository, IJogadorRepository } from "../../domain/repositories/interfaces.js";
+import type { CriarPartidaDTO, AtualizarPartidaDTO } from "../../shared/dto/index.dto.js";
 
-const jogadores: Array<Jogador> = await jogadorService.listarJogadores();
+export class PartidaService {
 
-class PartidaService {
-    private partidas: Partida[] = [
-        {
-            id: 1,
-            tipo: "Amador",
-            data: new Date,
+    constructor(
+        private partidaRepository: IPartidaRepository,
+        private jogadorRepository: IJogadorRepository
+    ) { }
+
+    private async buscarJogador(nome: string) {
+        const todos = await this.jogadorRepository.listarTodos();
+        return todos.find((j: any) => j.nome === nome);
+    }
+
+    async listarPartidas() {
+        return await this.partidaRepository.listarTodas();
+    }
+
+    // Agora usamos o DTO tipado em vez de 'any'
+    async criarPartida(idModerador: number, dataPartida: CriarPartidaDTO) {
+        const moderador = await this.jogadorRepository.buscarPorId(idModerador);
+        if (!moderador) throw new NotFoundErro("Moderador não encontrado.");
+
+        return await this.partidaRepository.criar({
+            ...dataPartida,
+            // Tratamento seguro de data
+            data: dataPartida.data ? new Date(dataPartida.data) : new Date(),
             situacao: "Aberta",
-            moderador: { id_moderador: 1, nome_moderador: "Thalisson" },
-            participantes: [],
-            inscricoes: [{ id_inscricao: 1, id_jogador: 3, nome_jogador: "Marcos", status: "pendente", data: new Date }],
-            avaliacoes: []
-        }
-    ];
-
-    private indexPorID(id: number): number {
-        return this.partidas.findIndex(part => part.id === id);
+            moderadorId: moderador.id,
+            preco: dataPartida.preco || 0,
+            pixChave: dataPartida.pixChave,
+            limiteCheckin: dataPartida.limiteCheckin || 1
+        });
     }
 
-    private indexPorNome(nome: string): number {
-        return jogadores.findIndex(jog => jog.nome === nome);
+    async excluirPartida(id: number) {
+        const existe = await this.partidaRepository.buscarPorId(id);
+        if (!existe) throw new NotFoundErro("Partida não encontrada!");
+        await this.partidaRepository.excluir(id);
     }
 
-    async listarPartidas(): Promise<Partida[]> {
-        return Promise.resolve(this.partidas);
-    };
-
-    async criarPartida(dataJogador: Pick<Jogador, 'nome'>, dataPartida: Pick<Partida, 'tipo'>): Promise<Partida | null> {
-        const jogadorIndex = this.indexPorNome(dataJogador.nome);
-
-        if (jogadorIndex === -1 || jogadores[jogadorIndex]?.id === undefined) {
-            throw new NotFoundErro("Moderador não encontrado ou ID inválido.");
-        }
-
-        const novaPartida = {
-            id: this.partidas.length > 0 ? this.partidas.length + 1 : 1,
-            tipo: dataPartida.tipo,
-            data: new Date,
-            situacao: "Aberta",
-            moderador: {
-                id_moderador: jogadores[jogadorIndex].id,
-                nome_moderador: dataJogador.nome
-            },
-            participantes: [],
-            inscricoes: [],
-            avaliacoes: []
-        }
-        this.partidas.push(novaPartida);
-        return Promise.resolve(novaPartida);
+    async atualizarDados(id: number, data: AtualizarPartidaDTO) {
+        const existe = await this.partidaRepository.buscarPorId(id);
+        if (!existe) throw new NotFoundErro("Partida não encontrada!");
+        return await this.partidaRepository.atualizar(id, data);
     }
 
-    async partidaExiste(id: number): Promise<boolean> {
-        const partidaIndex = this.indexPorID(id);
-        return Promise.resolve(partidaIndex != -1);
+    async listarInscricoes(id: number) {
+        const partida = await this.partidaRepository.buscarPorId(id);
+        if (!partida) throw new NotFoundErro("Partida não encontrada!");
+        return await this.partidaRepository.buscarInscricoesPorPartida(id);
     }
 
-    async excluirPartida(id: number): Promise<void> {
-        const partidaIndex = this.indexPorID(id);
-        if (partidaIndex === -1) {
-            throw new ConflictError("Partida não encontrada!");
-        }
+    async adicionarInscricao(idPartida: number, dataJogador: { nome: string }) {
+        const partida = await this.partidaRepository.buscarPorId(idPartida);
+        if (!partida) throw new NotFoundErro("Partida não encontrada");
+        if (partida.situacao !== "Aberta") throw new NotAllowed("Partida não está aberta para inscrições.");
+
+        const jogador = await this.buscarJogador(dataJogador.nome);
+        if (!jogador) throw new NotFoundErro('Jogador não existente');
+
+        const jaInscrito = await this.partidaRepository.verificarInscricaoExistente(idPartida, jogador.id);
+        if (jaInscrito) throw new NotAllowed("Jogador já inscrito.");
+
+        return await this.partidaRepository.adicionarInscricao({
+            partidaId: idPartida,
+            jogadorId: jogador.id
+        });
+    }
+
+    async aceitarInscricao(idInscricao: number) {
+        const inscricao = await this.partidaRepository.buscarInscricaoPorId(idInscricao);
+        if (!inscricao) throw new NotFoundErro("Inscrição não encontrada.");
+        if (inscricao.status !== 'pendente') throw new NotAllowed("Inscrição já processada.");
+
+        await this.partidaRepository.atualizarInscricao(idInscricao, { status: 'aceita' });
+    }
+
+    async recusarInscricao(idInscricao: number) {
+        const inscricao = await this.partidaRepository.buscarInscricaoPorId(idInscricao);
+        if (!inscricao) throw new NotFoundErro("Inscrição não encontrada.");
         
-        this.partidas.splice(partidaIndex, 1);
+        await this.partidaRepository.atualizarInscricao(idInscricao, { status: 'recusada' });
     }
 
-    async atualizarDados(id: number, data: Pick<Partida, 'situacao'>): Promise<Partida> {
-        const partidaIndex = this.indexPorID(id);
+    async confirmarPagamento(idInscricao: number) {
+        const inscricao = await this.partidaRepository.buscarInscricaoPorId(idInscricao);
+        if (!inscricao) throw new NotFoundErro("Inscrição não encontrada.");
 
-        if (partidaIndex === -1) {
-            throw new NotFoundErro("Partida não encontrada!");
-        }
-
-        const partidaAtualizada = this.partidas[partidaIndex]!;
-        partidaAtualizada.situacao = data.situacao ?? partidaAtualizada.situacao;
-        return Promise.resolve(partidaAtualizada);
+        await this.partidaRepository.atualizarInscricao(idInscricao, { 
+            statusPagamento: 'pago',
+            status: 'confirmada' 
+        });
     }
 
-    async listarInscricoes(id: number): Promise<Inscricao[] | undefined> {
-        const partidaIndex = this.indexPorID(id);
+    async realizarCheckIn(qrCode: string, idPartidaModerador: number) {
+        // Cast 'as any' removido se você atualizou a interface IPartidaRepository
+        const inscricao = await this.partidaRepository.buscarInscricaoPorQrCode(qrCode);
+        
+        if (!inscricao) throw new NotFoundErro("QR Code inválido ou inscrição não encontrada.");
 
-        if (partidaIndex === -1) {
-            throw new NotFoundErro("Partida não encontrada!");
+        if (inscricao.partidaId !== idPartidaModerador) {
+            throw new NotAllowed("Este QR Code pertence a outra partida.");
         }
 
-        return Promise.resolve(this.partidas[partidaIndex]?.inscricoes);
-    }
-
-    async adicionarInscricao(id: number, dataJogador: Pick<Jogador, 'nome'>): Promise<Inscricao> {
-        const partidaIndex = this.indexPorID(id);
-        const partida = this.partidas[partidaIndex];
-
-        if (!partida) {
-            throw new NotFoundErro("Partida não encontrada");
+        const limite = inscricao.partida.limiteCheckin;
+        if (inscricao.checkInCount >= limite) {
+            throw new NotAllowed(`Limite de ${limite} check-ins atingido para este participante.`);
         }
 
-        if (partida.situacao === "fechado") {
-            throw new NotAllowed("Partida já fechada");
-        }
-
-        const jogadorIndex = this.indexPorNome(dataJogador.nome);
-        const idJogador = jogadores[jogadorIndex]?.id;
-
-        if (typeof (idJogador) != "number") {
-            throw new NotFoundErro('ID de jogador não existente');
-        }
-
-        const novaInscricao = {
-            id_inscricao: partida.inscricoes.length + 1,
-            id_jogador: idJogador,
-            nome_jogador: dataJogador.nome,
-            status: "pendente",
-            data: new Date()
+        await this.partidaRepository.realizarCheckIn(inscricao.id);
+        
+        return { 
+            message: "Check-in realizado com sucesso!", 
+            participante: inscricao.jogador.nome,
+            checkInsRestantes: limite - (inscricao.checkInCount + 1)
         };
-
-        partida.inscricoes.push(novaInscricao);
-        return Promise.resolve(novaInscricao);
     }
 
-    async aceitarInscricao(id: number): Promise<void> {
-        let partidaDaInscricao: Partida | undefined;
-        let inscricao: Inscricao | undefined;
+    async adicionarAvaliacao(idPartida: number, nota: number, comentario: string, dataJogador: { nome: string }) {
+        const partida = await this.partidaRepository.buscarPorId(idPartida);
+        if (!partida) throw new NotFoundErro("Partida não encontrada");
 
-        for (let i = 0; i < this.partidas.length; i++) {
-            const partidaEncontrada = this.partidas[i];
-            const inscricaoEncontrada = partidaEncontrada?.inscricoes.find(ins => ins.id_inscricao === id);
-            if (inscricaoEncontrada) {
-                partidaDaInscricao = partidaEncontrada;
-                inscricao = inscricaoEncontrada;
-                break;
-            }
-        }
+        const jogador = await this.buscarJogador(dataJogador.nome);
+        if (!jogador) throw new NotFoundErro("Jogador não encontrado");
 
-        if (!inscricao) {
-            throw new NotFoundErro("Inscrição não encontrada.");
-        }
+        const inscricoes = await this.partidaRepository.buscarInscricoesPorPartida(idPartida);
+        const participou = inscricoes.some((i: any) => i.jogadorId === jogador.id && (i.status === 'aceita' || i.status === 'confirmada'));
+        
+        if (!participou) throw new NotAllowed("Jogador não participou da partida.");
 
-        if (inscricao.status !== 'pendente' || partidaDaInscricao?.situacao !== 'Aberta') {
-            throw new NotAllowed("Inscrição já aceita/rejeitada ou partida não está aberta.");
-        }
-
-        inscricao.status = 'aceita';
-        const novoParticipante = {
-            id_jogador: inscricao.id_jogador,
-            nome_jogador: inscricao.nome_jogador
-        }
-        partidaDaInscricao?.participantes.push(novoParticipante);
-        return Promise.resolve();
-    }
-
-    async recusarInscricao(id: number): Promise<void> {
-        let inscricao: Inscricao | undefined;
-
-        for (let i = 0; i < this.partidas.length; i++) {
-            const partidaProcurada = this.partidas[i];
-            const inscricaoEncontrada = partidaProcurada?.inscricoes.find(ins => ins.id_inscricao === id);
-            if (inscricaoEncontrada) {
-                inscricao = inscricaoEncontrada;
-                break;
-            }
-        }
-
-        if (!inscricao || inscricao.status != "pendente") {
-            throw new NotFoundErro('Incrição não encontrada.');
-        }
-
-        if (inscricao.status != "pendente") {
-            throw new NotAllowed('Incrição já aceita/rejeitada')
-        }
-
-        inscricao.status = 'rejeitada';
-        return Promise.resolve();
-    }
-
-    async adicionarAvaliacao(id: number, nota: number, comentario: string, dataJogador: Pick<Jogador, 'nome'>): Promise<Avaliacao | null> {
-        const partidaIndex = this.indexPorID(id);
-        const partida = this.partidas[partidaIndex];
-
-        const jogadorIndex = this.indexPorNome(dataJogador.nome);
-        const idJogador = jogadores[jogadorIndex]?.id;
-        const jaParticipa = partida?.participantes.some(part => part.nome_jogador === dataJogador.nome);
-
-        if (typeof idJogador !== "number" || !jaParticipa) {
-            throw new NotFoundErro("Jogador não encontrado");
-        }
-
-        const novaAvaliacao = {
-            id: (partida?.avaliacoes?.length ?? 0) + 1,
-            id_jogador: idJogador,
-            nome_jogador: dataJogador.nome,
-            nota: nota,
-            comentario: comentario
-        }
-
-        partida?.avaliacoes.push(novaAvaliacao);
-        return Promise.resolve(novaAvaliacao);
+        return await this.partidaRepository.adicionarAvaliacao({
+            partidaId: idPartida,
+            jogadorId: jogador.id,
+            nota,
+            comentario
+        });
     }
 }
-
-export const partidaService = new PartidaService();
