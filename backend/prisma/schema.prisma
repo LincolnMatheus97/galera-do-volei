@@ -20,6 +20,9 @@ model Jogador {
   categoria String
   moderador Boolean  @default(false)
   
+  // EventSync: Privacidade
+  visibilidade Boolean @default(true) // true = público, false = oculto
+
   partidasCriadas   Partida[]   @relation("ModeradorPartida")
   inscricoes        Inscricao[]
   
@@ -50,9 +53,13 @@ model Partida {
   situacao    String   @default("Aberta") 
   
   // EventSync
-  preco       Float    @default(0.0)
-  pixChave    String?
-  limiteCheckin Int    @default(1)
+  preco         Float    @default(0.0)
+  pixChave      String?
+  limiteCheckin Int      @default(1)
+  
+  // Novos campos para o PDF
+  bannerUrl     String?
+  cargaHoraria  Int      @default(0)
   
   moderadorId Int
   moderador   Jogador  @relation("ModeradorPartida", fields: [moderadorId], references: [id])
@@ -70,9 +77,9 @@ model Inscricao {
   data      DateTime @default(now())
   
   // EventSync
-  qrCode    String?  @unique // Hash para o cartão
-  checkInCount Int   @default(0)
-  statusPagamento String @default("aguardando") // aguardando, pago, gratis
+  qrCode          String?  @unique // Hash para o cartão
+  checkInCount    Int      @default(0)
+  statusPagamento String   @default("aguardando") // aguardando, pago, gratis
   
   jogadorId Int
   jogador   Jogador  @relation(fields: [jogadorId], references: [id])
@@ -127,7 +134,7 @@ model Amizade {
   destinatarioId Int
   destinatario   Jogador  @relation("AmigoDestinatario", fields: [destinatarioId], references: [id])
 
-  @@unique([solicitanteId, destinatarioId]) // Não pode pedir amizade 2 vezes pra mesma pessoa
+  @@unique([solicitanteId, destinatarioId]) 
   @@map("amizades")
 }
 
