@@ -1,11 +1,9 @@
 import { prisma } from "../prisma/client.js";
 import type { Partida, Inscricao, Avaliacao } from "@prisma/client";
-import { randomUUID } from "crypto"; // Para gerar o QR Code
+import { randomUUID } from "crypto"; 
 
 export class PrismaPartidaRepository {
     
-    // --- Métodos Básicos de Partida ---
-
     async criar(data: any): Promise<Partida> {
         return await prisma.partida.create({ data });
     }
@@ -46,8 +44,6 @@ export class PrismaPartidaRepository {
         });
     }
 
-    // --- Métodos Específicos ---
-
     async buscarInscricoesPorPartida(partidaId: number): Promise<Inscricao[]> {
         return await prisma.inscricao.findMany({
             where: { partidaId },
@@ -65,14 +61,11 @@ export class PrismaPartidaRepository {
     async buscarInscricaoPorQrCode(qrCode: string): Promise<Inscricao | null> {
         return await prisma.inscricao.findUnique({
             where: { qrCode },
-            include: { partida: true, jogador: true } // Trazemos dados para validar regras
+            include: { partida: true, jogador: true } 
         });
     }
 
-    // --- Métodos de Manipulação de Inscrição/Avaliação ---
-
     async adicionarInscricao(data: { partidaId: number, jogadorId: number }): Promise<Inscricao> {
-        // Gera um hash único para o QR Code no momento da criação
         const qrCodeHash = randomUUID();
         
         return await prisma.inscricao.create({
@@ -100,7 +93,7 @@ export class PrismaPartidaRepository {
         await prisma.inscricao.update({
             where: { id: inscricaoId },
             data: {
-                checkInCount: { increment: 1 } // Incrementa atômico no banco
+                checkInCount: { increment: 1 } 
             }
         });
     }
