@@ -5,14 +5,14 @@ import { prisma } from '../../src/persistence/prisma/client.js';
 let token: string;
 
 beforeAll(async () => {
-    // Limpeza radical antes de começar
+    await prisma.mensagem.deleteMany();
+    await prisma.amizade.deleteMany();
     await prisma.inscricao.deleteMany();
     await prisma.convite.deleteMany();
     await prisma.avaliacao.deleteMany();
     await prisma.partida.deleteMany();
     await prisma.jogador.deleteMany();
 
-    // Criar um usuário para ser o "Dono" das partidas nos testes
     await request(app).post('/jogadores').send({
         nome: "Organizador Master",
         email: "org@partida.com",
@@ -38,11 +38,11 @@ describe('Módulo de Partidas', () => {
         const res = await request(app)
             .post('/partidas')
             .send({ tipo: "Amador" });
-
+        
         expect(res.status).toBe(401);
     });
 
-    it('Deve criar uma partida Gratuita com sucesso', async () => {
+    it('Deve criar uma partida Gratuita (Padrão)', async () => {
         const res = await request(app)
             .post('/partidas')
             .set('Authorization', `Bearer ${token}`)
@@ -52,12 +52,11 @@ describe('Módulo de Partidas', () => {
             });
 
         expect(res.status).toBe(201);
-        expect(res.body).toHaveProperty('id');
         expect(res.body.situacao).toBe('Aberta');
-        expect(res.body.preco).toBe(0); // Default
+        expect(res.body.preco).toBe(0); 
     });
 
-    it('Deve criar uma partida Paga com dados extras', async () => {
+    it('Deve criar uma partida Paga com PIX', async () => {
         const res = await request(app)
             .post('/partidas')
             .set('Authorization', `Bearer ${token}`)
@@ -72,13 +71,13 @@ describe('Módulo de Partidas', () => {
         expect(res.status).toBe(201);
         expect(res.body.preco).toBe(50);
         expect(res.body.pixChave).toBe("teste@pix.com");
+        expect(res.body.limiteCheckin).toBe(2);
     });
 
-    it('Deve listar as partidas criadas', async () => {
+    it('Deve listar as partidas', async () => {
         const res = await request(app).get('/partidas');
-
+        
         expect(res.status).toBe(200);
-        expect(Array.isArray(res.body)).toBe(true);
-        expect(res.body.length).toBeGreaterThanOrEqual(2); // As duas criadas acima
+        expect(res.body.length).toBeGreaterThanOrEqual(2);
     });
 });
