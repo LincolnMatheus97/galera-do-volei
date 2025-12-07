@@ -11,10 +11,10 @@ let emailUserB = "amigo@social.com";
 async function limparBanco() {
     await prisma.mensagem.deleteMany();
     await prisma.amizade.deleteMany();
-    await prisma.inscricao.deleteMany();  // Faltava isso
-    await prisma.convite.deleteMany();    // Faltava isso
-    await prisma.avaliacao.deleteMany();  // Faltava isso
-    await prisma.partida.deleteMany();    // Faltava isso
+    await prisma.inscricao.deleteMany();
+    await prisma.convite.deleteMany();
+    await prisma.avaliacao.deleteMany();
+    await prisma.partida.deleteMany();
     await prisma.jogador.deleteMany();
 }
 
@@ -45,7 +45,31 @@ afterAll(async () => {
 
 describe('Módulo Social (Amigos e Mensagens)', () => {
 
-    it('Deve solicitar amizade com sucesso', async () => {
+    // Teste Novo de Privacidade
+    it('Não deve permitir solicitar amizade se o usuário tiver perfil oculto (Privacidade)', async () => {
+        // 1. Simulamos User B ocultando o perfil (update direto no banco pois não expusemos rota ainda)
+        await prisma.jogador.update({
+            where: { id: idUserB },
+            data: { visibilidade: false }
+        });
+
+        // 2. A tenta solicitar B
+        const res = await request(app)
+            .post('/amigos/solicitar')
+            .set('Authorization', `Bearer ${tokenUserA}`)
+            .send({ email: emailUserB });
+
+        // 3. Esperamos erro (404 Not Found conforme regra implementada no service)
+        expect(res.status).toBe(404);
+        
+        // 4. Restaurar visibilidade para os próximos testes
+        await prisma.jogador.update({
+            where: { id: idUserB },
+            data: { visibilidade: true }
+        });
+    });
+
+    it('Deve solicitar amizade com sucesso (Perfil Público)', async () => {
         const res = await request(app)
             .post('/amigos/solicitar')
             .set('Authorization', `Bearer ${tokenUserA}`)
@@ -71,7 +95,6 @@ describe('Módulo Social (Amigos e Mensagens)', () => {
     });
 
     it('Deve aceitar solicitação de amizade', async () => {
-        // User B busca o ID da solicitação (que deve estar pendente)
         const amizade = await prisma.amizade.findFirst({
             where: { solicitanteId: idUserA, destinatarioId: idUserB }
         });
@@ -93,7 +116,6 @@ describe('Módulo Social (Amigos e Mensagens)', () => {
 
         expect(res.status).toBe(200);
         expect(res.body).toHaveLength(1);
-        // O amigo de A deve ser o B
         expect(res.body[0].destinatario.nome).toBe("Social B");
     });
 
