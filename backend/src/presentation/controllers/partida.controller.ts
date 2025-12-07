@@ -1,11 +1,10 @@
 import { type Request, type Response } from 'express';
 import z from 'zod';
-import { partidaService } from '../../application/service/partida.service.js';
-import { HttpException } from '../middleware/httpException.middleware.js';
+import { makePartidaService as partidaService } from '../../main/factories.js';
+import { HttpException } from '../middleware/HttpException.middleware.js';
 
 export const criarPartidaSchema = z.object({
-    tipo: z.string({ message: "O tipo da partida é obrigatória." }),
-    nome_moderador: z.string({ message: "O nome do moderador é obrigatório." })
+    tipo: z.string({ message: "O tipo da partida é obrigatória." })
 });
 
 export const edtDadosBasicosPartidaSchema = z.object({
@@ -29,7 +28,19 @@ class PartidaController {
     }
 
     async criarPartida(req: Request, res: Response) {
-        const novaPartida = await partidaService.criarPartida({ nome: req.body.nome_moderador }, { tipo: req.body.tipo });
+        // 1. Pegamos o ID do usuário logado (seguro, vem do middleware)
+        const idUsuarioLogado = parseInt(req.headers['user-id'] as string, 10);
+
+        if (isNaN(idUsuarioLogado)) {
+            throw new HttpException("Token inválido ou usuário não identificado.", 401);
+        }
+
+        // 2. Chamamos o service passando o ID direto
+        const novaPartida = await partidaService.criarPartida(
+            idUsuarioLogado,
+            req.body
+        );
+
         res.status(201).json(novaPartida);
     }
 
