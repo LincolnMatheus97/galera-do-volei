@@ -1,9 +1,9 @@
 import type { Request, Response, NextFunction } from "express";
 import { HttpException } from "./HttpException.middleware.js";
-import { NotFoundErro } from "../../application/errors/NotFoundErro.errors.js";
-import { NotAllowed } from "../../application/errors/NotAllowed.errors.js";
+import { NotFoundErro } from "../../shared/errors/NotFoundErro.errors.js";
+import { NotAllowed } from "../../shared/errors/NotAllowed.errors.js";
 import { ZodError } from "zod";
-import { ConflictError } from "../../application/errors/ConflictError.errors.js";
+import { ConflictError } from "../../shared/errors/ConflictError.errors.js";
 
 export const globalErrorMiddleware = (error: Error, req: Request, res: Response, next: NextFunction) => {
     console.log(`ERRO: ${error.message}`);
