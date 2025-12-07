@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { addAvaliacaoSchema, addInscricaoPartidaSchema, checkInSchema, criarPartidaSchema, edtDadosBasicosPartidaSchema, partidaController } from "../controllers/partida.controller.js";
+import { addAvaliacaoSchema, addInscricaoPartidaSchema, criarPartidaSchema, edtDadosBasicosPartidaSchema, partidaController } from "../controllers/partida.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { validationMiddleware } from "../middleware/validation.middleware.js";
 
@@ -13,8 +13,6 @@ router.patch('/partidas/:id', authMiddleware, validationMiddleware(edtDadosBasic
 router.post('/partidas/:id/inscricoes', validationMiddleware(addInscricaoPartidaSchema), authMiddleware, partidaController.criarInscricao);
 router.post('/inscricoes/:id/aceitar', authMiddleware, partidaController.aceitarInscricao);
 router.post('/inscricoes/:id/recusar', authMiddleware, partidaController.recusarInscricao);
-router.post('/inscricoes/:id/pagamento', authMiddleware, partidaController.confirmarPagamento);
-router.post('/partidas/:id/checkin', authMiddleware, validationMiddleware(checkInSchema), partidaController.realizarCheckIn);
 router.post('/partidas/:id/avaliacoes', validationMiddleware(addAvaliacaoSchema), authMiddleware, partidaController.criarAvaliacao);
 
 export default router;
