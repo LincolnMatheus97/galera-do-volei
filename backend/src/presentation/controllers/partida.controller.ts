@@ -96,7 +96,6 @@ class PartidaController {
         return res.status(200).json({ message: 'Inscrição Recusada' });
     }
 
-    // --- NOVO: Confirmar Pagamento ---
     async confirmarPagamento(req: Request, res: Response) {
         const idInscricao = parseInt(req.params.id || '', 10);
         if (isNaN(idInscricao)) throw new HttpException("ID inválido.", 400);
@@ -105,7 +104,6 @@ class PartidaController {
         return res.status(200).json({ message: 'Pagamento Confirmado' });
     }
 
-    // --- NOVO: Check-in ---
     async realizarCheckIn(req: Request, res: Response) {
         // O ID da partida vem na URL (onde o moderador está fazendo checkin)
         const idPartida = parseInt(req.params.id || '', 10);

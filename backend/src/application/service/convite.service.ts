@@ -64,18 +64,11 @@ export class ConviteService {
         if (convite.status !== "pendente") throw new NotAllowed("Convite já respondido.");
 
         await this.conviteRepository.atualizarStatus(id, "aceita");
-
-        // Inscreve automaticamente
-        // O método adicionarInscricao cria com status 'pendente' por padrão no repo.
-        // Se quisermos que entre como 'aceita' (pois foi convite), precisamos atualizar logo em seguida
-        // ou alterar o método adicionarInscricao para aceitar status.
-
         const inscricao = await this.partidaRepository.adicionarInscricao({
             partidaId: convite.partidaId,
             jogadorId: convite.destinatarioId
         });
 
-        // Atualiza para 'aceita' já que veio de um convite
         if (inscricao && inscricao.id) {
             await this.partidaRepository.atualizarInscricao(inscricao.id, { status: 'aceita' });
         }

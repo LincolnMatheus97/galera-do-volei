@@ -29,7 +29,6 @@ export const edtModeracaoJogadorSchema = z.object({
 
 class JogadorController {
 
-    // --- NOVO: Login ---
     async login(req: Request, res: Response) {
         const resultado = await jogadorService.login(req.body);
         return res.status(200).json(resultado);
