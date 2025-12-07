@@ -1,0 +1,103 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// --- TABELAS ---
+
+model Jogador {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  email     String   @unique
+  senhaHash String   
+  
+  sexo      String
+  categoria String
+  moderador Boolean  @default(false)
+  
+  partidasCriadas   Partida[]   @relation("ModeradorPartida")
+  inscricoes        Inscricao[]
+  convitesEnviados  Convite[]   @relation("Remetente")
+  convitesRecebidos Convite[]   @relation("Destinatario")
+  avaliacoesFeitas  Avaliacao[]
+
+  @@map("jogadores")
+}
+
+model Partida {
+  id          Int      @id @default(autoincrement())
+  titulo      String   @default("Partida de Vôlei") 
+  descricao   String?
+  tipo        String   
+  data        DateTime
+  local       String?
+  situacao    String   @default("Aberta") 
+  
+  // Novos Campos do EventSync
+  preco       Float    @default(0.0) // 0 = Gratuito
+  pixChave    String?  // Se pago, a chave PIX
+  limiteCheckin Int    @default(1)   // Quantas vezes pode fazer check-in
+  
+  moderadorId Int
+  moderador   Jogador  @relation("ModeradorPartida", fields: [moderadorId], references: [id])
+  
+  inscricoes  Inscricao[]
+  convites    Convite[]
+  avaliacoes  Avaliacao[]
+
+  @@map("partidas")
+}
+
+model Inscricao {
+  id        Int      @id @default(autoincrement())
+  status    String   @default("pendente")
+  data      DateTime @default(now())
+  
+  // Novos Campos do EventSync
+  qrCode    String?  @unique // Hash único para gerar o QR Code
+  checkInCount Int   @default(0) // Quantos check-ins já fez
+  statusPagamento String @default("aguardando") // "pago", "aguardando", "gratis"
+  
+  jogadorId Int
+  jogador   Jogador  @relation(fields: [jogadorId], references: [id])
+  
+  partidaId Int
+  partida   Partida  @relation(fields: [partidaId], references: [id])
+
+  @@map("inscricoes")
+}
+
+model Convite {
+  id             Int      @id @default(autoincrement())
+  status         String   @default("pendente")
+  
+  remetenteId    Int
+  remetente      Jogador  @relation("Remetente", fields: [remetenteId], references: [id])
+  
+  destinatarioId Int
+  destinatario   Jogador  @relation("Destinatario", fields: [destinatarioId], references: [id])
+  
+  partidaId      Int
+  partida        Partida  @relation(fields: [partidaId], references: [id])
+
+  @@map("convites")
+}
+
+model Avaliacao {
+  id         Int      @id @default(autoincrement())
+  nota       Int
+  comentario String
+  data       DateTime @default(now())
+  
+  jogadorId  Int
+  jogador    Jogador  @relation(fields: [jogadorId], references: [id])
+  
+  partidaId  Int
+  partida    Partida  @relation(fields: [partidaId], references: [id])
+
+  @@map("avaliacoes")
+}
