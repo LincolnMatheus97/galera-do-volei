@@ -1,3 +1,4 @@
+// Este arquivo define suas tabelas no banco de dados
 generator client {
   provider = "prisma-client-js"
 }
@@ -21,9 +22,20 @@ model Jogador {
   
   partidasCriadas   Partida[]   @relation("ModeradorPartida")
   inscricoes        Inscricao[]
+  
+  // Convites
   convitesEnviados  Convite[]   @relation("Remetente")
   convitesRecebidos Convite[]   @relation("Destinatario")
+  
+  // Avaliações
   avaliacoesFeitas  Avaliacao[]
+
+  // --- SOCIAL ---
+  amigosSolicitados Amizade[] @relation("Solicitante")
+  amigosRecebidos   Amizade[] @relation("AmigoDestinatario")
+  
+  mensagensEnviadas Mensagem[] @relation("MsgRemetente")
+  mensagensRecebidas Mensagem[] @relation("MsgDestinatario")
 
   @@map("jogadores")
 }
@@ -37,10 +49,10 @@ model Partida {
   local       String?
   situacao    String   @default("Aberta") 
   
-  // Novos Campos do EventSync
-  preco       Float    @default(0.0) // 0 = Gratuito
-  pixChave    String?  // Se pago, a chave PIX
-  limiteCheckin Int    @default(1)   // Quantas vezes pode fazer check-in
+  // EventSync
+  preco       Float    @default(0.0)
+  pixChave    String?
+  limiteCheckin Int    @default(1)
   
   moderadorId Int
   moderador   Jogador  @relation("ModeradorPartida", fields: [moderadorId], references: [id])
@@ -54,13 +66,13 @@ model Partida {
 
 model Inscricao {
   id        Int      @id @default(autoincrement())
-  status    String   @default("pendente")
+  status    String   @default("pendente") // pendente, aceita, recusada, confirmada (pago)
   data      DateTime @default(now())
   
-  // Novos Campos do EventSync
-  qrCode    String?  @unique // Hash único para gerar o QR Code
-  checkInCount Int   @default(0) // Quantos check-ins já fez
-  statusPagamento String @default("aguardando") // "pago", "aguardando", "gratis"
+  // EventSync
+  qrCode    String?  @unique // Hash para o cartão
+  checkInCount Int   @default(0)
+  statusPagamento String @default("aguardando") // aguardando, pago, gratis
   
   jogadorId Int
   jogador   Jogador  @relation(fields: [jogadorId], references: [id])
@@ -100,4 +112,35 @@ model Avaliacao {
   partida    Partida  @relation(fields: [partidaId], references: [id])
 
   @@map("avaliacoes")
+}
+
+// --- TABELAS SOCIAL ---
+
+model Amizade {
+  id             Int      @id @default(autoincrement())
+  status         String   @default("pendente") // pendente, aceita
+  data           DateTime @default(now())
+
+  solicitanteId  Int
+  solicitante    Jogador  @relation("Solicitante", fields: [solicitanteId], references: [id])
+
+  destinatarioId Int
+  destinatario   Jogador  @relation("AmigoDestinatario", fields: [destinatarioId], references: [id])
+
+  @@unique([solicitanteId, destinatarioId]) // Não pode pedir amizade 2 vezes pra mesma pessoa
+  @@map("amizades")
+}
+
+model Mensagem {
+  id             Int      @id @default(autoincrement())
+  conteudo       String
+  data           DateTime @default(now())
+
+  remetenteId    Int
+  remetente      Jogador  @relation("MsgRemetente", fields: [remetenteId], references: [id])
+
+  destinatarioId Int
+  destinatario   Jogador  @relation("MsgDestinatario", fields: [destinatarioId], references: [id])
+
+  @@map("mensagens")
 }
