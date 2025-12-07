@@ -7,6 +7,8 @@ const router = Router();
 
 router.get('/partidas', partidaController.listarPartidas);
 router.get('/partidas/:id/inscricoes', partidaController.listarInscricoes);
+router.get('/partidas/:id/export', authMiddleware, partidaController.exportarInscritos);
+router.get('/partidas/:id/certificado', authMiddleware, partidaController.gerarCertificado);
 router.post('/partidas', authMiddleware, validationMiddleware(criarPartidaSchema), partidaController.criarPartida);
 router.delete('/partidas/:id', authMiddleware, partidaController.deletar);
 router.patch('/partidas/:id', authMiddleware, validationMiddleware(edtDadosBasicosPartidaSchema), partidaController.atualizarDados);

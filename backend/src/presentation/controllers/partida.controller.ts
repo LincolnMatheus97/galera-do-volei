@@ -2,6 +2,7 @@ import { type Request, type Response } from 'express';
 import z from 'zod';
 import { makePartidaService as partidaService } from '../../main/factories.js';
 import { HttpException } from '../middleware/HttpException.middleware.js';
+import PDFDocument from 'pdfkit';
 
 // Schemas
 export const criarPartidaSchema = z.object({
@@ -9,7 +10,9 @@ export const criarPartidaSchema = z.object({
     titulo: z.string().optional(),
     preco: z.number().optional(),
     pixChave: z.string().optional(),
-    limiteCheckin: z.number().optional()
+    limiteCheckin: z.number().optional(),
+    bannerUrl: z.string().url().optional(),
+    cargaHoraria: z.number().optional()
 });
 
 export const edtDadosBasicosPartidaSchema = z.object({
@@ -71,6 +74,50 @@ class PartidaController {
         res.status(200).json(todasAsInscricoes);
     }
 
+    // Método Novo: Exportar CSV
+    async exportarInscritos(req: Request, res: Response) {
+        const idParam = req.params.id ?? '';
+        const idPartida = parseInt(idParam, 10);
+        if (isNaN(idPartida)) throw new HttpException("ID inválido.", 400);
+
+        const csvData = await partidaService.exportarListaInscritos(idPartida);
+
+        res.header('Content-Type', 'text/csv');
+        res.attachment(`inscritos_partida_${idPartida}.csv`);
+        return res.send(csvData);
+    }
+
+    // Método Novo: Gerar Certificado PDF
+    async gerarCertificado(req: Request, res: Response) {
+        const idParam = req.params.id ?? '';
+        const idPartida = parseInt(idParam, 10);
+        const idUsuario = parseInt(req.headers['user-id'] as string, 10);
+
+        if (isNaN(idPartida) || isNaN(idUsuario)) throw new HttpException("Dados inválidos.", 400);
+
+        const dados = await partidaService.gerarDadosCertificado(idPartida, idUsuario);
+
+        // Geração do PDF
+        const doc = new PDFDocument();
+        
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=certificado_${idUsuario}.pdf`);
+
+        doc.pipe(res);
+
+        doc.fontSize(25).text('CERTIFICADO DE PARTICIPAÇÃO', { align: 'center' });
+        doc.moveDown();
+        doc.fontSize(16).text(`Certificamos que ${dados.participante} participou do evento:`, { align: 'center' });
+        doc.fontSize(20).text(dados.evento, { align: 'center' });
+        doc.moveDown();
+        doc.fontSize(14).text(`Data: ${new Date(dados.data).toLocaleDateString()}`, { align: 'center' });
+        doc.text(`Carga Horária: ${dados.cargaHoraria} horas`, { align: 'center' });
+        doc.moveDown();
+        doc.fontSize(10).text(`Código de Validação: ${dados.codigoValidacao}`, { align: 'center' });
+
+        doc.end();
+    }
+
     async criarInscricao(req: Request, res: Response) {
         const idParam = req.params.id ?? '';
         const idParaAdd = parseInt(idParam, 10);
@@ -105,7 +152,6 @@ class PartidaController {
     }
 
     async realizarCheckIn(req: Request, res: Response) {
-        // O ID da partida vem na URL (onde o moderador está fazendo checkin)
         const idPartida = parseInt(req.params.id || '', 10);
         if (isNaN(idPartida)) throw new HttpException("ID da partida inválido.", 400);
 

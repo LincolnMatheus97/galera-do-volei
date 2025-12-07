@@ -19,20 +19,21 @@ export class PartidaService {
         return await this.partidaRepository.listarTodas();
     }
 
-    // Agora usamos o DTO tipado em vez de 'any'
+    // Agora usamos o DTO oficial atualizado
     async criarPartida(idModerador: number, dataPartida: CriarPartidaDTO) {
         const moderador = await this.jogadorRepository.buscarPorId(idModerador);
         if (!moderador) throw new NotFoundErro("Moderador não encontrado.");
 
         return await this.partidaRepository.criar({
             ...dataPartida,
-            // Tratamento seguro de data
             data: dataPartida.data ? new Date(dataPartida.data) : new Date(),
             situacao: "Aberta",
             moderadorId: moderador.id,
             preco: dataPartida.preco || 0,
             pixChave: dataPartida.pixChave,
-            limiteCheckin: dataPartida.limiteCheckin || 1
+            limiteCheckin: dataPartida.limiteCheckin || 1,
+            bannerUrl: dataPartida.bannerUrl,
+            cargaHoraria: dataPartida.cargaHoraria || 0
         });
     }
 
@@ -52,6 +53,48 @@ export class PartidaService {
         const partida = await this.partidaRepository.buscarPorId(id);
         if (!partida) throw new NotFoundErro("Partida não encontrada!");
         return await this.partidaRepository.buscarInscricoesPorPartida(id);
+    }
+
+    async exportarListaInscritos(idPartida: number) {
+        const partida = await this.partidaRepository.buscarPorId(idPartida);
+        if (!partida) throw new NotFoundErro("Partida não encontrada!");
+
+        const inscricoes = await this.partidaRepository.buscarInscricoesPorPartida(idPartida);
+        
+        if (inscricoes.length === 0) {
+            throw new NotFoundErro("Não há inscritos para esta partida.");
+        }
+
+        // Gera CSV
+        let csv = "ID,Nome,Email,Status,CheckIns\n";
+        inscricoes.forEach((i: any) => {
+            csv += `${i.id},${i.jogador.nome},${i.jogador.email},${i.status},${i.checkInCount}\n`;
+        });
+
+        return csv;
+    }
+
+    async gerarDadosCertificado(idPartida: number, idUsuario: number) {
+        const partida = await this.partidaRepository.buscarPorId(idPartida);
+        if (!partida) throw new NotFoundErro("Partida não encontrada.");
+
+        const inscricoes = await this.partidaRepository.buscarInscricoesPorPartida(idPartida);
+        const inscricao = inscricoes.find((i: any) => i.jogadorId === idUsuario);
+
+        if (!inscricao) throw new NotAllowed("Você não está inscrito neste evento.");
+        
+        // Regra do PDF: Exige Check-in
+        if (inscricao.checkInCount < 1) {
+            throw new NotAllowed("Certificado disponível apenas para quem realizou check-in.");
+        }
+
+        return {
+            participante: inscricao.jogador.nome,
+            evento: partida.titulo,
+            data: partida.data,
+            cargaHoraria: partida.cargaHoraria,
+            codigoValidacao: inscricao.qrCode
+        };
     }
 
     async adicionarInscricao(idPartida: number, dataJogador: { nome: string }) {
@@ -97,7 +140,6 @@ export class PartidaService {
     }
 
     async realizarCheckIn(qrCode: string, idPartidaModerador: number) {
-        // Cast 'as any' removido se você atualizou a interface IPartidaRepository
         const inscricao = await this.partidaRepository.buscarInscricaoPorQrCode(qrCode);
         
         if (!inscricao) throw new NotFoundErro("QR Code inválido ou inscrição não encontrada.");
