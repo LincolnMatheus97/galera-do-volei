@@ -1,29 +1,14 @@
-import { ConflictError } from "../errors/ConflictError.errors.js";
-import { NotFoundErro } from "../errors/NotFoundErro.errors.js";
-import { NotAllowed } from "../errors/NotAllowed.errors.js";
+import { ConflictError } from "../../shared/errors/ConflictError.errors.js";
+import { NotFoundErro } from "../../shared/errors/NotFoundErro.errors.js";
+import { NotAllowed } from "../../shared/errors/NotAllowed.errors.js";
+import type { IJogadorRepository } from "../../domain/repositories/interfaces.js";
+import type { CriarJogadorDTO, LoginDTO, AtualizarJogadorDTO } from "../../shared/dto/index.dto.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import type { IJogadorRepository } from "../repositories/interfaces.js";
-
-type CriarJogadorDTO = {
-    nome: string;
-    email: string;
-    senha: string;
-    sexo: string;
-    categoria: string;
-};
-
-type LoginDTO = {
-    email: string;
-    senha: string;
-};
 
 export class JogadorService {
-    
-    // INJEÇÃO DE DEPENDÊNCIA:
-    constructor(private jogadorRepository: IJogadorRepository) {}
 
-    // --- AUTENTICAÇÃO ---
+    constructor(private jogadorRepository: IJogadorRepository) { }
 
     async login(data: LoginDTO) {
         const jogador = await this.jogadorRepository.buscarPorEmail(data.email);
@@ -59,11 +44,9 @@ export class JogadorService {
         };
     }
 
-    // --- CRUD ---
-
     async criarJogador(data: CriarJogadorDTO) {
         const existe = await this.jogadorRepository.buscarPorEmail(data.email);
-        
+
         if (existe) {
             throw new ConflictError("Já existe um jogador com este email!");
         }
@@ -89,13 +72,11 @@ export class JogadorService {
 
     async excluirJogador(id: number) {
         const existe = await this.jogadorRepository.buscarPorId(id);
-        if (!existe) {
-            throw new NotFoundErro("Jogador não encontrado!");
-        }
+        if (!existe) throw new NotFoundErro("Jogador não encontrado!");
         await this.jogadorRepository.excluir(id);
     }
 
-    async atualizarDados(id: number, data: { nome?: string, sexo?: string, categoria?: string }) {
+    async atualizarDados(id: number, data: AtualizarJogadorDTO) {
         const existe = await this.jogadorRepository.buscarPorId(id);
         if (!existe) throw new NotFoundErro("Jogador não encontrado!");
 

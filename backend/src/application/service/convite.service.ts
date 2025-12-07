@@ -1,7 +1,7 @@
-import { NotFoundErro } from "../errors/NotFoundErro.errors.js";
-import { NotAllowed } from "../errors/NotAllowed.errors.js";
-import { ConflictError } from "../errors/ConflictError.errors.js";
-import type { IConviteRepository, IJogadorRepository, IPartidaRepository } from "../repositories/interfaces.js";
+import { NotFoundErro } from "../../shared/errors/NotFoundErro.errors.js";
+import { NotAllowed } from "../../shared/errors/NotAllowed.errors.js";
+import { ConflictError } from "../../shared/errors/ConflictError.errors.js";
+import type { IConviteRepository, IJogadorRepository, IPartidaRepository } from "../../domain/repositories/interfaces.js";
 
 export class ConviteService {
 
@@ -10,7 +10,7 @@ export class ConviteService {
         private conviteRepository: IConviteRepository,
         private jogadorRepository: IJogadorRepository,
         private partidaRepository: IPartidaRepository
-    ) {}
+    ) { }
 
     async listarConvites(usuarioId?: number) {
         if (usuarioId) {
@@ -20,7 +20,7 @@ export class ConviteService {
     }
 
     async criarConvite(remetenteId: number, nomeDestinatario: string) {
-        
+
         const remetente = await this.jogadorRepository.buscarPorId(remetenteId);
         if (!remetente) throw new NotFoundErro("Remetente inválido.");
 
@@ -69,7 +69,7 @@ export class ConviteService {
         // O método adicionarInscricao cria com status 'pendente' por padrão no repo.
         // Se quisermos que entre como 'aceita' (pois foi convite), precisamos atualizar logo em seguida
         // ou alterar o método adicionarInscricao para aceitar status.
-        
+
         const inscricao = await this.partidaRepository.adicionarInscricao({
             partidaId: convite.partidaId,
             jogadorId: convite.destinatarioId
@@ -77,7 +77,7 @@ export class ConviteService {
 
         // Atualiza para 'aceita' já que veio de um convite
         if (inscricao && inscricao.id) {
-            await this.partidaRepository.atualizarInscricao(inscricao.id, 'aceita');
+            await this.partidaRepository.atualizarInscricao(inscricao.id, { status: 'aceita' });
         }
     }
 

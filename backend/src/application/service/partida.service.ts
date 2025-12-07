@@ -1,52 +1,51 @@
-import { NotFoundErro } from "../errors/NotFoundErro.errors.js";
-import { NotAllowed } from "../errors/NotAllowed.errors.js";
-import type { IPartidaRepository, IJogadorRepository } from "../repositories/interfaces.js";
+import { NotFoundErro } from "../../shared/errors/NotFoundErro.errors.js";
+import { NotAllowed } from "../../shared/errors/NotAllowed.errors.js";
+import type { IPartidaRepository, IJogadorRepository } from "../../domain/repositories/interfaces.js";
+import type { CriarPartidaDTO, AtualizarPartidaDTO } from "../../shared/dto/index.dto.js";
 
 export class PartidaService {
-    
-    // Injetamos DOIS repositórios (Partida e Jogador)
+
     constructor(
         private partidaRepository: IPartidaRepository,
         private jogadorRepository: IJogadorRepository
-    ) {}
+    ) { }
 
-    // Helper privado
     private async buscarJogador(nome: string) {
         const todos = await this.jogadorRepository.listarTodos();
         return todos.find((j: any) => j.nome === nome);
     }
-    
+
     async listarPartidas() {
         return await this.partidaRepository.listarTodas();
     }
 
-    async criarPartida(idModerador: number, dataPartida: any) { 
+    // Agora usamos o DTO tipado em vez de 'any'
+    async criarPartida(idModerador: number, dataPartida: CriarPartidaDTO) {
         const moderador = await this.jogadorRepository.buscarPorId(idModerador);
-
-        if (!moderador) {
-            throw new NotFoundErro("Moderador não encontrado.");
-        }
+        if (!moderador) throw new NotFoundErro("Moderador não encontrado.");
 
         return await this.partidaRepository.criar({
             ...dataPartida,
+            // Tratamento seguro de data
             data: dataPartida.data ? new Date(dataPartida.data) : new Date(),
             situacao: "Aberta",
-            moderadorId: moderador.id
+            moderadorId: moderador.id,
+            preco: dataPartida.preco || 0,
+            pixChave: dataPartida.pixChave,
+            limiteCheckin: dataPartida.limiteCheckin || 1
         });
     }
-    
+
     async excluirPartida(id: number) {
         const existe = await this.partidaRepository.buscarPorId(id);
         if (!existe) throw new NotFoundErro("Partida não encontrada!");
-        
         await this.partidaRepository.excluir(id);
     }
 
-    async atualizarDados(id: number, data: { situacao: string }) {
+    async atualizarDados(id: number, data: AtualizarPartidaDTO) {
         const existe = await this.partidaRepository.buscarPorId(id);
         if (!existe) throw new NotFoundErro("Partida não encontrada!");
-
-        return await this.partidaRepository.atualizar(id, { situacao: data.situacao });
+        return await this.partidaRepository.atualizar(id, data);
     }
 
     async listarInscricoes(id: number) {
@@ -58,7 +57,7 @@ export class PartidaService {
     async adicionarInscricao(idPartida: number, dataJogador: { nome: string }) {
         const partida = await this.partidaRepository.buscarPorId(idPartida);
         if (!partida) throw new NotFoundErro("Partida não encontrada");
-        if (partida.situacao === "fechado") throw new NotAllowed("Partida já fechada");
+        if (partida.situacao !== "Aberta") throw new NotAllowed("Partida não está aberta para inscrições.");
 
         const jogador = await this.buscarJogador(dataJogador.nome);
         if (!jogador) throw new NotFoundErro('Jogador não existente');
@@ -75,19 +74,50 @@ export class PartidaService {
     async aceitarInscricao(idInscricao: number) {
         const inscricao = await this.partidaRepository.buscarInscricaoPorId(idInscricao);
         if (!inscricao) throw new NotFoundErro("Inscrição não encontrada.");
+        if (inscricao.status !== 'pendente') throw new NotAllowed("Inscrição já processada.");
 
-        if (inscricao.status !== 'pendente') {
-            throw new NotAllowed("Inscrição já processada.");
-        }
-
-        await this.partidaRepository.atualizarInscricao(idInscricao, 'aceita');
+        await this.partidaRepository.atualizarInscricao(idInscricao, { status: 'aceita' });
     }
 
     async recusarInscricao(idInscricao: number) {
         const inscricao = await this.partidaRepository.buscarInscricaoPorId(idInscricao);
         if (!inscricao) throw new NotFoundErro("Inscrição não encontrada.");
         
-        await this.partidaRepository.atualizarInscricao(idInscricao, 'recusada');
+        await this.partidaRepository.atualizarInscricao(idInscricao, { status: 'recusada' });
+    }
+
+    async confirmarPagamento(idInscricao: number) {
+        const inscricao = await this.partidaRepository.buscarInscricaoPorId(idInscricao);
+        if (!inscricao) throw new NotFoundErro("Inscrição não encontrada.");
+
+        await this.partidaRepository.atualizarInscricao(idInscricao, { 
+            statusPagamento: 'pago',
+            status: 'confirmada' 
+        });
+    }
+
+    async realizarCheckIn(qrCode: string, idPartidaModerador: number) {
+        // Cast 'as any' removido se você atualizou a interface IPartidaRepository
+        const inscricao = await this.partidaRepository.buscarInscricaoPorQrCode(qrCode);
+        
+        if (!inscricao) throw new NotFoundErro("QR Code inválido ou inscrição não encontrada.");
+
+        if (inscricao.partidaId !== idPartidaModerador) {
+            throw new NotAllowed("Este QR Code pertence a outra partida.");
+        }
+
+        const limite = inscricao.partida.limiteCheckin;
+        if (inscricao.checkInCount >= limite) {
+            throw new NotAllowed(`Limite de ${limite} check-ins atingido para este participante.`);
+        }
+
+        await this.partidaRepository.realizarCheckIn(inscricao.id);
+        
+        return { 
+            message: "Check-in realizado com sucesso!", 
+            participante: inscricao.jogador.nome,
+            checkInsRestantes: limite - (inscricao.checkInCount + 1)
+        };
     }
 
     async adicionarAvaliacao(idPartida: number, nota: number, comentario: string, dataJogador: { nome: string }) {
@@ -98,8 +128,10 @@ export class PartidaService {
         if (!jogador) throw new NotFoundErro("Jogador não encontrado");
 
         const inscricoes = await this.partidaRepository.buscarInscricoesPorPartida(idPartida);
-        const participou = inscricoes.some((i: any) => i.jogadorId === jogador.id && i.status === 'aceita');
+        const participou = inscricoes.some((i: any) => i.jogadorId === jogador.id && (i.status === 'aceita' || i.status === 'confirmada'));
         
+        if (!participou) throw new NotAllowed("Jogador não participou da partida.");
+
         return await this.partidaRepository.adicionarAvaliacao({
             partidaId: idPartida,
             jogadorId: jogador.id,
