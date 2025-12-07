@@ -12,6 +12,12 @@ export class SocialService {
         const destinatario = await this.jogadorRepository.buscarPorEmail(emailDestinatario);
         if (!destinatario) throw new NotFoundErro("Usuário não encontrado.");
         
+        // Regra de Privacidade do PDF: Se oculto, não pode receber pedido.
+        // O banco retorna boolean, se for false, simulamos que não existe.
+        if (destinatario.visibilidade === false) {
+            throw new NotFoundErro("Usuário não encontrado ou perfil privado.");
+        }
+        
         if (solicitanteId === destinatario.id) throw new NotAllowed("Você não pode ser amigo de si mesmo.");
 
         return await this.socialRepository.solicitarAmizade(solicitanteId, destinatario.id);
