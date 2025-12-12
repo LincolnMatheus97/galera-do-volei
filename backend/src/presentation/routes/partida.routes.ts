@@ -6,6 +6,7 @@ import { validationMiddleware } from "../middleware/validation.middleware.js";
 const router = Router();
 
 router.get('/partidas', partidaController.listarPartidas);
+router.get('/partidas/:id', partidaController.buscarPorId);
 router.get('/partidas/:id/inscricoes', partidaController.listarInscricoes);
 router.get('/partidas/:id/export', authMiddleware, partidaController.exportarInscritos);
 router.get('/partidas/:id/certificado', authMiddleware, partidaController.gerarCertificado);

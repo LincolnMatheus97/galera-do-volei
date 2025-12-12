@@ -4,7 +4,9 @@ import { makeConviteService as conviteService } from '../../main/factories.js';
 import { HttpException } from "../middleware/HttpException.middleware.js";
 
 export const criarConviteSchema = z.object({
-    nome_destinatario: z.string({ message: 'Nome do destinatario do convite é obrigatorio.' })
+    nome_destinatario: z.string({ message: 'Nome do destinatario do convite é obrigatorio.' }),
+    // Novo campo opcional para resolver o problema de múltiplas partidas
+    id_partida: z.number().optional()
 });
 
 class ConviteController {
@@ -26,13 +28,16 @@ class ConviteController {
         const idRemetente = parseInt(req.headers['user-id'] as string, 10);
 
         if (isNaN(idRemetente)) {
-            console.error("--> ERRO: Token inválido (user-id NaN) no POST");
             throw new HttpException("Token inválido.", 401);
         }
 
+        // Captura o ID da partida se vier
+        const { nome_destinatario, id_partida } = req.body;
+
         const novoConvite = await conviteService.criarConvite(
             idRemetente,
-            req.body.nome_destinatario
+            nome_destinatario,
+            id_partida // Passa para o service
         );
         return res.status(201).json(novoConvite);
     }

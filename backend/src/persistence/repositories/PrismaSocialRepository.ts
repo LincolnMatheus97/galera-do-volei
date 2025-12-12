@@ -1,6 +1,17 @@
 import { prisma } from "../prisma/client.js";
 
 export class PrismaSocialRepository {
+    async buscarRelacao(userA: number, userB: number) {
+        return await prisma.amizade.findFirst({
+            where: {
+                OR: [
+                    { solicitanteId: userA, destinatarioId: userB },
+                    { solicitanteId: userB, destinatarioId: userA }
+                ]
+            }
+        });
+    }
+
     async solicitarAmizade(solicitanteId: number, destinatarioId: number) {
         return await prisma.amizade.create({
             data: {
@@ -11,6 +22,7 @@ export class PrismaSocialRepository {
         });
     }
 
+    // ... manter os outros métodos ...
     async aceitarAmizade(id: number) {
         await prisma.amizade.update({
             where: { id },
@@ -27,7 +39,8 @@ export class PrismaSocialRepository {
             where: {
                 OR: [
                     { solicitanteId: usuarioId, status: 'aceita' },
-                    { destinatarioId: usuarioId, status: 'aceita' }
+                    { destinatarioId: usuarioId, status: 'aceita' },
+                    { destinatarioId: usuarioId, status: 'pendente' } 
                 ]
             },
             include: {
@@ -37,6 +50,7 @@ export class PrismaSocialRepository {
         });
     }
 
+    // Este verifica se JÁ SÃO AMIGOS (para permitir chat)
     async verificarAmizade(userA: number, userB: number): Promise<boolean> {
         const count = await prisma.amizade.count({
             where: {

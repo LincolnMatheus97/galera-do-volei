@@ -15,8 +15,18 @@ export const criarPartidaSchema = z.object({
     cargaHoraria: z.number().optional()
 });
 
+// CORREÇÃO: Expandindo o schema para permitir editar tudo, não só a situação
 export const edtDadosBasicosPartidaSchema = z.object({
-    situacao: z.string({ message: "A situação da partida é obrigatória." })
+    situacao: z.string().optional(),
+    titulo: z.string().optional(),
+    descricao: z.string().optional(),
+    data: z.string().optional(), // Recebe ISO string
+    local: z.string().optional(),
+    preco: z.number().optional(),
+    pixChave: z.string().optional(),
+    limiteCheckin: z.number().optional(),
+    bannerUrl: z.string().url().optional(),
+    cargaHoraria: z.number().optional()
 });
 
 export const addInscricaoPartidaSchema = z.object({
@@ -37,6 +47,18 @@ class PartidaController {
     async listarPartidas(req: Request, res: Response) {
         const todasAsPartidas = await partidaService.listarPartidas();
         res.status(200).json(todasAsPartidas);
+    }
+
+    async buscarPorId(req: Request, res: Response) {
+        const idParam = req.params.id ?? '';
+        const id = parseInt(idParam, 10);
+
+        if (isNaN(id)) {
+            throw new HttpException("ID inválido.", 400);
+        }
+
+        const partida = await partidaService.buscarPorId(id);
+        return res.status(200).json(partida);
     }
 
     async criarPartida(req: Request, res: Response) {
@@ -60,8 +82,7 @@ class PartidaController {
         const idParam = req.params.id ?? '';
         const idParaAtualizar = parseInt(idParam, 10);
         if (isNaN(idParaAtualizar)) throw new HttpException("ID inválido.", 400);
-
-        const partidaAtualizada = await partidaService.atualizarDados(idParaAtualizar, { situacao: req.body.situacao });
+        const partidaAtualizada = await partidaService.atualizarDados(idParaAtualizar, req.body);
         return res.status(200).json(partidaAtualizada);
     }
 
@@ -74,7 +95,6 @@ class PartidaController {
         res.status(200).json(todasAsInscricoes);
     }
 
-    // Método Novo: Exportar CSV
     async exportarInscritos(req: Request, res: Response) {
         const idParam = req.params.id ?? '';
         const idPartida = parseInt(idParam, 10);
@@ -87,7 +107,6 @@ class PartidaController {
         return res.send(csvData);
     }
 
-    // Método Novo: Gerar Certificado PDF
     async gerarCertificado(req: Request, res: Response) {
         const idParam = req.params.id ?? '';
         const idPartida = parseInt(idParam, 10);
@@ -97,23 +116,30 @@ class PartidaController {
 
         const dados = await partidaService.gerarDadosCertificado(idPartida, idUsuario);
 
-        // Geração do PDF
-        const doc = new PDFDocument();
+        const doc = new PDFDocument({ layout: 'landscape' }); // Deitado fica mais bonito
         
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename=certificado_${idUsuario}.pdf`);
 
         doc.pipe(res);
-
-        doc.fontSize(25).text('CERTIFICADO DE PARTICIPAÇÃO', { align: 'center' });
+        doc.rect(20, 20, doc.page.width - 40, doc.page.height - 40).stroke(); // Borda
+        doc.moveDown(2);
+        doc.font('Helvetica-Bold').fontSize(30).text('CERTIFICADO DE PARTICIPAÇÃO', { align: 'center' });
         doc.moveDown();
-        doc.fontSize(16).text(`Certificamos que ${dados.participante} participou do evento:`, { align: 'center' });
-        doc.fontSize(20).text(dados.evento, { align: 'center' });
+        doc.font('Helvetica').fontSize(16).text('Certificamos que', { align: 'center' });
+        doc.moveDown(0.5);
+        doc.font('Helvetica-Bold').fontSize(22).text(dados.participante, { align: 'center' });
+        doc.moveDown(0.5);
+        doc.font('Helvetica').fontSize(16).text('participou com êxito do evento', { align: 'center' });
+        doc.moveDown(0.5);
+        doc.font('Helvetica-Bold').fontSize(22).text(dados.evento, { align: 'center' });
         doc.moveDown();
-        doc.fontSize(14).text(`Data: ${new Date(dados.data).toLocaleDateString()}`, { align: 'center' });
-        doc.text(`Carga Horária: ${dados.cargaHoraria} horas`, { align: 'center' });
-        doc.moveDown();
-        doc.fontSize(10).text(`Código de Validação: ${dados.codigoValidacao}`, { align: 'center' });
+        
+        const dataFormatada = new Date(dados.data).toLocaleDateString('pt-BR');
+        doc.font('Helvetica').fontSize(14).text(`Realizado em: ${dataFormatada}`, { align: 'center' });
+        doc.moveDown(4);
+        doc.fillColor('grey').fontSize(10).text(`Código de Validação: ${dados.codigoValidacao}`, { align: 'center' });
+        doc.text('EventSync Oficial', { align: 'center' }).fillColor('black');
 
         doc.end();
     }

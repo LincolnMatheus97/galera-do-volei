@@ -21,7 +21,13 @@ export class PrismaPartidaRepository {
         return await prisma.partida.findUnique({
             where: { id },
             include: {
-                moderador: true,
+                moderador: {
+                    select: {
+                        id: true, 
+                        nome: true,
+                        email: true 
+                    }
+                },
                 inscricoes: { include: { jogador: true } }, 
                 avaliacoes: true
             }

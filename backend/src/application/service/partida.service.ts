@@ -19,6 +19,14 @@ export class PartidaService {
         return await this.partidaRepository.listarTodas();
     }
 
+    async buscarPorId(id: number) {
+        const partida = await this.partidaRepository.buscarPorId(id);
+        if (!partida) {
+            throw new NotFoundErro("Partida não encontrada.");
+        }
+        return partida;
+    }
+
     // Agora usamos o DTO oficial atualizado
     async criarPartida(idModerador: number, dataPartida: CriarPartidaDTO) {
         const moderador = await this.jogadorRepository.buscarPorId(idModerador);
