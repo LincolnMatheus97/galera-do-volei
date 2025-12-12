@@ -13,8 +13,6 @@ interface TokenPayload {
 export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
     const { authorization } = req.headers;
 
-    console.log("DEBUG HEADER:", authorization);
-
     if (!authorization) {
         throw new HttpException('Token não fornecido.', 401);
     }
