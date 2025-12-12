@@ -1,5 +1,6 @@
 import { NotAllowed } from "../../shared/errors/NotAllowed.errors.js";
 import { NotFoundErro } from "../../shared/errors/NotFoundErro.errors.js";
+import { ConflictError } from "../../shared/errors/ConflictError.errors.js"; // Importe isso
 import type { ISocialRepository, IJogadorRepository } from "../../domain/repositories/interfaces.js";
 
 export class SocialService {
@@ -12,17 +13,21 @@ export class SocialService {
         const destinatario = await this.jogadorRepository.buscarPorEmail(emailDestinatario);
         if (!destinatario) throw new NotFoundErro("Usuário não encontrado.");
         
-        // Regra de Privacidade do PDF: Se oculto, não pode receber pedido.
-        // O banco retorna boolean, se for false, simulamos que não existe.
         if (destinatario.visibilidade === false) {
             throw new NotFoundErro("Usuário não encontrado ou perfil privado.");
         }
         
         if (solicitanteId === destinatario.id) throw new NotAllowed("Você não pode ser amigo de si mesmo.");
+        const relacaoExistente = await this.socialRepository.buscarRelacao(solicitanteId, destinatario.id);
+        
+        if (relacaoExistente) {
+             throw new ConflictError("Vocês já são amigos ou já existe uma solicitação pendente.");
+        }
 
         return await this.socialRepository.solicitarAmizade(solicitanteId, destinatario.id);
     }
 
+    // ... restante dos métodos (aceitarAmizade, enviarMensagem, etc) mantenha igual ...
     async aceitarAmizade(idAmizade: number, usuarioLogadoId: number) {
         const amizade = await this.socialRepository.buscarAmizade(idAmizade);
         if (!amizade) throw new NotFoundErro("Solicitação não encontrada.");
@@ -35,7 +40,6 @@ export class SocialService {
     }
 
     async enviarMensagem(remetenteId: number, destinatarioId: number, conteudo: string) {
-        // Validação: São amigos?
         const saoAmigos = await this.socialRepository.verificarAmizade(remetenteId, destinatarioId);
         
         if (!saoAmigos) {

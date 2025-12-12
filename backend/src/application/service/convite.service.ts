@@ -5,7 +5,6 @@ import type { IConviteRepository, IJogadorRepository, IPartidaRepository } from 
 
 export class ConviteService {
 
-    // Injeção de 3 dependências via construtor
     constructor(
         private conviteRepository: IConviteRepository,
         private jogadorRepository: IJogadorRepository,
@@ -19,28 +18,40 @@ export class ConviteService {
         return [];
     }
 
-    async criarConvite(remetenteId: number, nomeDestinatario: string) {
+    // Adicionado parâmetro opcional partidaIdEspecifica
+    async criarConvite(remetenteId: number, nomeDestinatario: string, partidaIdEspecifica?: number) {
 
         const remetente = await this.jogadorRepository.buscarPorId(remetenteId);
         if (!remetente) throw new NotFoundErro("Remetente inválido.");
 
-        // Busca todos para filtrar por nome (poderia ser otimizado no repo futuro)
         const todos = await this.jogadorRepository.listarTodos();
         const destinatario = todos.find((j: any) => j.nome === nomeDestinatario);
 
         if (!destinatario) throw new NotFoundErro("Jogador destinatário não encontrado.");
         if (remetente.id === destinatario.id) throw new NotAllowed("Você não pode convidar a si mesmo.");
 
-        const todasPartidas = await this.partidaRepository.listarTodas();
-        const partida = todasPartidas.find((p: any) => p.moderadorId === remetente.id && p.situacao === 'Aberta');
+        let partida;
+
+        if (partidaIdEspecifica) {
+            partida = await this.partidaRepository.buscarPorId(partidaIdEspecifica);
+            
+            // Validações de segurança
+            if (!partida) throw new NotFoundErro("Partida especificada não encontrada.");
+            if (partida.moderadorId !== remetente.id) throw new NotAllowed("Você não é o dono desta partida.");
+            if (partida.situacao !== 'Aberta') throw new NotAllowed("Esta partida não está aberta.");
+        
+        } else {
+            const todasPartidas = await this.partidaRepository.listarTodas();
+            partida = todasPartidas.find((p: any) => p.moderadorId === remetente.id && p.situacao === 'Aberta');
+        }
 
         if (!partida) {
-            throw new NotFoundErro("Você não tem nenhuma partida aberta para convidar jogadores.");
+            throw new NotFoundErro("Nenhuma partida aberta encontrada para convite.");
         }
 
         const jaConvidado = await this.conviteRepository.verificarDuplicidade(remetente.id, destinatario.id, partida.id);
         if (jaConvidado) {
-            throw new ConflictError("Já existe um convite pendente para este jogador.");
+            throw new ConflictError("Já existe um convite pendente para este jogador nesta partida.");
         }
 
         return await this.conviteRepository.criar({
