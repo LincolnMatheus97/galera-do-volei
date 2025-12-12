@@ -37,6 +37,7 @@ export interface ISocialRepository {
     aceitarAmizade(id: number): Promise<void>;
     listarAmigos(usuarioId: number): Promise<any[]>;
     buscarAmizade(id: number): Promise<any>;
+    buscarRelacao(userA: number, userB: number): Promise<any>; 
     enviarMensagem(remetenteId: number, destinatarioId: number, conteudo: string): Promise<any>;
     listarMensagens(usuarioId: number): Promise<any[]>;
     verificarAmizade(userA: number, userB: number): Promise<boolean>;
