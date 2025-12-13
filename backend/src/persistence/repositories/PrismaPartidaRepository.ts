@@ -71,14 +71,14 @@ export class PrismaPartidaRepository {
         });
     }
 
-    async adicionarInscricao(data: { partidaId: number, jogadorId: number }): Promise<Inscricao> {
+    async adicionarInscricao(data: { partidaId: number, jogadorId: number, status?: string }): Promise<Inscricao> {
         const qrCodeHash = randomUUID();
         
         return await prisma.inscricao.create({
             data: {
                 partidaId: data.partidaId,
                 jogadorId: data.jogadorId,
-                status: 'pendente',
+                status: data.status || 'pendente',
                 qrCode: qrCodeHash
             }
         });
