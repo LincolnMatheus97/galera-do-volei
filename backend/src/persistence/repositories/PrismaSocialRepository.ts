@@ -50,7 +50,6 @@ export class PrismaSocialRepository {
         });
     }
 
-    // Este verifica se JÁ SÃO AMIGOS (para permitir chat)
     async verificarAmizade(userA: number, userB: number): Promise<boolean> {
         const count = await prisma.amizade.count({
             where: {

@@ -61,7 +61,11 @@ export default function DetalhesPartidaPage() {
         setProcessing(true);
         try {
             await api.post(`/partidas/${id}/inscricoes`, { nome_jogador: user.nome });
-            alert("Solicitação enviada com sucesso!");
+            if (partida?.preco && partida.preco > 0) {
+                alert("Solicitação enviada com sucesso!");
+            } else {
+                alert("Inscrição realizada com sucesso!");
+            }
             fetchDados();
         } catch (error: any) {
             alert(error.response?.data?.message || "Erro ao se inscrever");
@@ -287,8 +291,7 @@ export default function DetalhesPartidaPage() {
                                 <div className="p-3 bg-blue-50 text-blue-800 rounded-lg text-sm border border-blue-100">Você é o Organizador.</div>
                                 
                                 <Link href={`/partidas/${id}/checkin`} className="block w-full text-center bg-gray-900 text-white py-3 rounded-lg font-bold hover:bg-gray-800 shadow-md">Scanner Check-in</Link>
-                                
-                                {/* BOTÃO EDITAR */}
+
                                 <Link href={`/partidas/${id}/editar`} className="block w-full text-center border-2 border-gray-300 text-gray-700 py-3 rounded-lg font-bold hover:bg-gray-50 flex items-center justify-center gap-2">
                                     <Edit size={18} /> Editar Partida
                                 </Link>
@@ -319,10 +322,28 @@ export default function DetalhesPartidaPage() {
 
                                 {(minhaInscricao.status === 'aceita' || minhaInscricao.status === 'confirmada') && (
                                     <>
-                                        <div className="transform scale-90 origin-top"><QRCodeCard inscricao={minhaInscricao} nomeEvento={partida.titulo} /></div>
+                                        {/* Se tem pixChave e ainda não confirmou pagamento, mostra botão de pagamento */}
+                                        {partida.pixChave && minhaInscricao.status === 'aceita' ? (
+                                            <Link
+                                                href={`/partidas/${id}/pagamento`}
+                                                className="block w-full text-center bg-gray-900 text-white py-3 rounded-lg font-bold hover:bg-gray-800 shadow-md"
+                                            >
+                                                Realizar pagamento
+                                            </Link>
+                                        ) : (
+                                            // Se não tem pixChave ou já confirmou pagamento, mostra o QRCode
+                                            <div className="transform scale-90 origin-top">
+                                                <QRCodeCard inscricao={minhaInscricao} nomeEvento={partida.titulo} />
+                                            </div>
+                                        )}
+
+                                        {/* Certificado só se finalizada e fez check-in */}
                                         {partida.situacao === 'Finalizada' && (
                                             fizCheckIn ? (
-                                                <button onClick={handleDownloadCertificado} className="w-full bg-purple-600 text-white py-3 rounded-lg font-bold hover:bg-purple-700 shadow-md flex items-center justify-center gap-2">
+                                                <button
+                                                    onClick={handleDownloadCertificado}
+                                                    className="w-full bg-purple-600 text-white py-3 rounded-lg font-bold hover:bg-purple-700 shadow-md flex items-center justify-center gap-2"
+                                                >
                                                     <Award size={20} /> Baixar Certificado
                                                 </button>
                                             ) : (

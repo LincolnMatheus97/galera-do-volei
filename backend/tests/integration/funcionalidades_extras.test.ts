@@ -51,7 +51,7 @@ beforeAll(async () => {
     // 3. Partida (Com Carga Horária)
     const partida = await request(app).post('/partidas')
         .set('Authorization', `Bearer ${tokenMod}`)
-        .send({ tipo: "Amador", titulo: "Curso Volei", cargaHoraria: 10 });
+        .send({ tipo: "Amador", titulo: "Curso Volei"});
     idPartida = partida.body.id;
 
     // 4. Inscrição e Aceite

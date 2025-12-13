@@ -12,6 +12,6 @@ export const makeJogadorService = new JogadorService(jogadorRepository);
 
 export const makePartidaService = new PartidaService(partidaRepository, jogadorRepository);
 
-export const makeConviteService = new ConviteService(conviteRepository, jogadorRepository, partidaRepository);
+export const makeConviteService = new ConviteService(conviteRepository, jogadorRepository, partidaRepository, socialRepository);
 
 export const makeSocialService = new SocialService(socialRepository, jogadorRepository);

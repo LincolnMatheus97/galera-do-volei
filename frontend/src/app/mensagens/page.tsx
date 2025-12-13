@@ -94,6 +94,15 @@ export default function MensagensPage() {
         }
     }
 
+    async function recusarAmizade(idAmizade: number) {
+        try {
+            await api.post(`/amigos/${idAmizade}/recusar`);
+            fetchSocialData();
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
     if (!isAuthenticated) return null;
 
     return (

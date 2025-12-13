@@ -13,7 +13,7 @@ export interface AuthResponse {
     usuario: Usuario;
 }
 
-// Interface para Avaliação (NOVO)
+// Interface para Avaliação
 export interface Avaliacao {
     id: number;
     nota: number;
@@ -34,7 +34,6 @@ export interface Partida {
     pixChave?: string;
     limiteCheckin: number;
     bannerUrl?: string;
-    cargaHoraria: number;
     moderador?: {
         id: number;
         nome: string;

@@ -41,7 +41,6 @@ export class PartidaService {
             pixChave: dataPartida.pixChave,
             limiteCheckin: dataPartida.limiteCheckin || 1,
             bannerUrl: dataPartida.bannerUrl,
-            cargaHoraria: dataPartida.cargaHoraria || 0
         });
     }
 
@@ -100,7 +99,6 @@ export class PartidaService {
             participante: inscricao.jogador.nome,
             evento: partida.titulo,
             data: partida.data,
-            cargaHoraria: partida.cargaHoraria,
             codigoValidacao: inscricao.qrCode
         };
     }
@@ -116,9 +114,12 @@ export class PartidaService {
         const jaInscrito = await this.partidaRepository.verificarInscricaoExistente(idPartida, jogador.id);
         if (jaInscrito) throw new NotAllowed("Jogador já inscrito.");
 
+        const statusInicial = (!partida.exigeAprovacao && partida.preco === 0) ? 'aceita' : 'pendente';
+
         return await this.partidaRepository.adicionarInscricao({
             partidaId: idPartida,
-            jogadorId: jogador.id
+            jogadorId: jogador.id,
+            status: statusInicial
         });
     }
 

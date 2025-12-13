@@ -20,14 +20,11 @@ const criarPartidaSchema = z.object({
     data: z.string().min(1, "A data é obrigatória"),
     hora: z.string().min(1, "A hora é obrigatória"),
     local: z.string().optional(),
-    
-    // Validação simplificada para compatibilidade com valueAsNumber
     preco: z.number().min(0, "Preço inválido"),
     pixChave: z.string().optional(),
     limiteCheckin: z.number().min(1, "Mínimo 1 check-in"),
-    cargaHoraria: z.number().min(0, "Carga horária deve ser positiva"),
-    
-    bannerUrl: z.string().url("URL inválida").optional().or(z.literal(''))
+    bannerUrl: z.string().url("URL inválida").optional().or(z.literal('')),
+    exigeAprovacao: z.boolean().optional()
 });
 
 type CriarPartidaData = z.infer<typeof criarPartidaSchema>;
@@ -48,11 +45,11 @@ export default function CriarPartidaPage() {
         defaultValues: {
             preco: 0,
             limiteCheckin: 1,
-            cargaHoraria: 0
         }
     });
 
     const precoAtual = watch('preco');
+    const exigeAprovacao = watch('exigeAprovacao');
 
     async function onSubmit(data: CriarPartidaData) {
         try {
@@ -60,7 +57,6 @@ export default function CriarPartidaPage() {
             const dataCombinada = new Date(`${data.data}T${data.hora}:00`);
             
             // 2. Separar os campos que NÃO devem ir para o backend (hora e data string)
-            // Usamos desestruturação para retirar 'hora' e 'data' do objeto 'rest'
             const { hora, data: dataString, ...rest } = data;
 
             // 3. Montar o payload limpo
@@ -123,14 +119,31 @@ export default function CriarPartidaPage() {
                     <div className="border-t pt-4 mt-4">
                         <h2 className="text-lg font-semibold text-gray-800 mb-4">Configurações Avançadas</h2>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <Input 
-                                label="Preço (R$)" 
-                                type="number" 
-                                step="0.01"
-                                {...register("preco", { valueAsNumber: true })} 
-                                error={errors.preco?.message} 
+                        <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                            <input 
+                                type="checkbox" 
+                                id="checkAprovacao"
+                                className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
+                                {...register("exigeAprovacao")}
                             />
+                            <label htmlFor="checkAprovacao" className="text-sm font-medium text-gray-700 cursor-pointer">
+                                <strong>Exigir aprovação manual?</strong>
+                                <p className="text-xs text-gray-500 font-normal">
+                                    Se desmarcado, a inscrição em eventos gratuitos será confirmada automaticamente.
+                                </p>
+                            </label>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {exigeAprovacao && (
+                                <Input 
+                                    label="Preço (R$)" 
+                                    type="number" 
+                                    step="0.01"
+                                    {...register("preco", { valueAsNumber: true })} 
+                                    error={errors.preco?.message} 
+                                />
+                            )}
 
                             {precoAtual > 0 && (
                                 <Input 
@@ -148,13 +161,6 @@ export default function CriarPartidaPage() {
                                 error={errors.limiteCheckin?.message} 
                             />
 
-                            <Input 
-                                label="Carga Horária (Para Certificado)" 
-                                type="number" 
-                                placeholder="Horas"
-                                {...register("cargaHoraria", { valueAsNumber: true })} 
-                                error={errors.cargaHoraria?.message} 
-                            />
                         </div>
 
                         <Input 

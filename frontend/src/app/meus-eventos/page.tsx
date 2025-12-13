@@ -2,33 +2,62 @@
 
 import { useEffect, useState } from 'react';
 import { api } from '@/services/api';
-import { Partida } from '@/types';
+import { Partida, Inscricao } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import { EventCard } from '@/components/events/EventCard';
+import { QRCodeCard } from '@/components/events/QRCodeCard'; // Supondo que exista esse componente
 import { Ticket } from 'lucide-react';
 
 export default function MeusEventosPage() {
     const { user, isAuthenticated } = useAuth();
     const [minhasPartidas, setMinhasPartidas] = useState<Partida[]>([]);
+    const [minhasInscricoes, setMinhasInscricoes] = useState<Inscricao[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (user) fetchMeusDados();
+        if (user) {
+            fetchMeusDados();
+            fetchMinhasInscricoes();
+        }
     }, [user]);
 
     async function fetchMeusDados() {
         try {
-            // Busca todas as partidas e filtra as criadas pelo usuário
             const resPartidas = await api.get<Partida[]>('/partidas');
             const todasPartidas = resPartidas.data;
             const criadasPorMim = todasPartidas.filter(p => p.moderador?.id === user?.id);
             setMinhasPartidas(criadasPorMim);
         } catch (error) {
             console.error("Erro", error);
-        } finally {
-            setLoading(false);
         }
     }
+
+    async function fetchMinhasInscricoes() {
+    try {
+        const resPartidas = await api.get<Partida[]>('/partidas');
+        const partidas = resPartidas.data;
+        let inscricoesUsuario: Inscricao[] = [];
+
+        // Para cada partida, busca as inscrições e filtra as do usuário
+        await Promise.all(partidas.map(async (partida) => {
+            const res = await api.get<Inscricao[]>(`/partidas/${partida.id}/inscricoes`);
+            const inscricoes = res.data;
+            const minhas = inscricoes.filter(i => i.jogador?.email === user?.email);
+            minhas.forEach(i => {
+                if (i.jogador) {
+                    i.jogador.email = partida.inscricoes ? partida.titulo : i.jogador.email;
+                }
+            });
+            inscricoesUsuario.push(...minhas);
+        }));
+
+        setMinhasInscricoes(inscricoesUsuario);
+    } catch (error) {
+        console.error("Erro ao buscar inscrições", error);
+    } finally {
+        setLoading(false);
+    }
+}
 
     if (!isAuthenticated) return null;
 
@@ -63,12 +92,25 @@ export default function MeusEventosPage() {
                         <Ticket className="mr-2" /> Meus Tickets
                     </h2>
                     <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-                        <p className="text-gray-600 text-sm mb-2">
-                            Para visualizar seus ingressos e QR Codes, acesse a página de detalhes do evento em que você se inscreveu no <a href="/dashboard" className="text-blue-600 underline">Dashboard</a>.
-                        </p>
-                        <div className="mt-4 p-3 bg-yellow-50 text-yellow-800 text-xs rounded border border-yellow-200">
-                            <strong>Dica:</strong> Após ser aprovado, o QR Code aparecerá automaticamente na página do evento.
-                        </div>
+                        {loading ? (
+                            <div className="h-40 bg-gray-100 rounded animate-pulse"></div>
+                        ) : minhasInscricoes.length > 0 ? (
+                            <div className="space-y-4">
+                                {minhasInscricoes
+                                    .filter(i => i.status === 'confirmada' || i.status === 'aceita')
+                                    .map(inscricao => (
+                                        <QRCodeCard
+                                            key={inscricao.id}
+                                            inscricao={inscricao}
+                                            nomeEvento={minhasPartidas.find(p => p.id === inscricao.id)?.titulo || 'Evento Desconhecido'}
+                                        />
+                                    ))}
+                            </div>
+                        ) : (
+                            <p className="text-gray-500 p-4 border border-dashed rounded-lg bg-white">
+                                Você ainda não possui tickets de eventos.
+                            </p>
+                        )}
                     </div>
                 </div>
             </div>

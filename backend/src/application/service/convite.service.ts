@@ -1,14 +1,15 @@
 import { NotFoundErro } from "../../shared/errors/NotFoundErro.errors.js";
 import { NotAllowed } from "../../shared/errors/NotAllowed.errors.js";
 import { ConflictError } from "../../shared/errors/ConflictError.errors.js";
-import type { IConviteRepository, IJogadorRepository, IPartidaRepository } from "../../domain/repositories/interfaces.js";
+import type { IConviteRepository, IJogadorRepository, IPartidaRepository, ISocialRepository } from "../../domain/repositories/interfaces.js";
 
 export class ConviteService {
 
     constructor(
         private conviteRepository: IConviteRepository,
         private jogadorRepository: IJogadorRepository,
-        private partidaRepository: IPartidaRepository
+        private partidaRepository: IPartidaRepository,
+        private socialRepository: ISocialRepository,
     ) { }
 
     async listarConvites(usuarioId?: number) {
@@ -29,6 +30,9 @@ export class ConviteService {
 
         if (!destinatario) throw new NotFoundErro("Jogador destinatário não encontrado.");
         if (remetente.id === destinatario.id) throw new NotAllowed("Você não pode convidar a si mesmo.");
+
+        const saoAmigos = await this.socialRepository.verificarAmizade(remetenteId, destinatario.id);
+        if (!saoAmigos) throw new NotAllowed("Você só pode convidar amigos!");
 
         let partida;
 
