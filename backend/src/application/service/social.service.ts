@@ -1,6 +1,6 @@
 import { NotAllowed } from "../../shared/errors/NotAllowed.errors.js";
 import { NotFoundErro } from "../../shared/errors/NotFoundErro.errors.js";
-import { ConflictError } from "../../shared/errors/ConflictError.errors.js"; // Importe isso
+import { ConflictError } from "../../shared/errors/ConflictError.errors.js";
 import type { ISocialRepository, IJogadorRepository } from "../../domain/repositories/interfaces.js";
 
 export class SocialService {
@@ -27,7 +27,6 @@ export class SocialService {
         return await this.socialRepository.solicitarAmizade(solicitanteId, destinatario.id);
     }
 
-    // ... restante dos métodos (aceitarAmizade, enviarMensagem, etc) mantenha igual ...
     async aceitarAmizade(idAmizade: number, usuarioLogadoId: number) {
         const amizade = await this.socialRepository.buscarAmizade(idAmizade);
         if (!amizade) throw new NotFoundErro("Solicitação não encontrada.");
