@@ -27,7 +27,6 @@ export type CriarPartidaDTO = {
     pixChave?: string;
     limiteCheckin?: number;
     bannerUrl?: string;
-    cargaHoraria?: number;
 };
 
 export type AtualizarPartidaDTO = {
