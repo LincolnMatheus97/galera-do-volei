@@ -15,14 +15,10 @@ model Jogador {
   nome      String
   email     String   @unique
   senhaHash String   
-  
   sexo      String
   categoria String
   moderador Boolean  @default(false)
-  
-  // EventSync: Privacidade
   visibilidade Boolean @default(true) // true = público, false = oculto
-
   partidasCriadas   Partida[]   @relation("ModeradorPartida")
   inscricoes        Inscricao[]
   
@@ -51,19 +47,13 @@ model Partida {
   data        DateTime
   local       String?
   situacao    String   @default("Aberta") 
-  
-  // EventSync
   preco         Float    @default(0.0)
   pixChave      String?
   limiteCheckin Int      @default(1)
-  
-  // Novos campos para o PDF
   bannerUrl     String?
-  cargaHoraria  Int      @default(0)
-  
+  exigeAprovacao Boolean @default(true) // Se true, inscrição = pendente. Se false, inscrição = aceita (se grátis)
   moderadorId Int
   moderador   Jogador  @relation("ModeradorPartida", fields: [moderadorId], references: [id])
-  
   inscricoes  Inscricao[]
   convites    Convite[]
   avaliacoes  Avaliacao[]
@@ -75,8 +65,6 @@ model Inscricao {
   id        Int      @id @default(autoincrement())
   status    String   @default("pendente") // pendente, aceita, recusada, confirmada (pago)
   data      DateTime @default(now())
-  
-  // EventSync
   qrCode          String?  @unique // Hash para o cartão
   checkInCount    Int      @default(0)
   statusPagamento String   @default("aguardando") // aguardando, pago, gratis
