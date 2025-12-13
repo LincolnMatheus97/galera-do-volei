@@ -47,6 +47,12 @@ export function Navbar() {
                                 >
                                     Convites
                                 </Link>
+                                <Link 
+                                    href="/perfil" 
+                                    className="border-transparent text-gray-500 hover:border-blue-500 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors"
+                                >
+                                    Perfil
+                                </Link>
                             </div>
                         )}
                     </div>
@@ -108,6 +114,9 @@ export function Navbar() {
                                 </Link>
                                 <Link href="/convites" className="block px-4 py-2 text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900">
                                     Convites
+                                </Link>
+                                <Link href="/perfil" className="block px-4 py-2 text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900">
+                                    Perfil
                                 </Link>
                                 <div className="border-t border-gray-200 pt-4 pb-1">
                                     <div className="px-4 flex items-center">
