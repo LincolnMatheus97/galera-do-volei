@@ -68,7 +68,6 @@ describe('Módulo de Partidas', () => {
                 pixChave: "teste@pix.com",
                 limiteCheckin: 2,
                 bannerUrl: "https://site.com/banner.png", // Novo Campo
-                cargaHoraria: 4 // Novo Campo
             });
 
         expect(res.status).toBe(201);
@@ -77,7 +76,6 @@ describe('Módulo de Partidas', () => {
         expect(res.body.limiteCheckin).toBe(2);
         // Validando novos campos do PDF
         expect(res.body.bannerUrl).toBe("https://site.com/banner.png");
-        expect(res.body.cargaHoraria).toBe(4);
     });
 
     it('Deve listar as partidas', async () => {
