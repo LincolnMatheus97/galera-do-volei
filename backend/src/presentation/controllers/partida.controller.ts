@@ -12,10 +12,8 @@ export const criarPartidaSchema = z.object({
     pixChave: z.string().optional(),
     limiteCheckin: z.number().optional(),
     bannerUrl: z.string().url().optional(),
-    cargaHoraria: z.number().optional()
 });
 
-// CORREÇÃO: Expandindo o schema para permitir editar tudo, não só a situação
 export const edtDadosBasicosPartidaSchema = z.object({
     situacao: z.string().optional(),
     titulo: z.string().optional(),
@@ -26,7 +24,6 @@ export const edtDadosBasicosPartidaSchema = z.object({
     pixChave: z.string().optional(),
     limiteCheckin: z.number().optional(),
     bannerUrl: z.string().url().optional(),
-    cargaHoraria: z.number().optional()
 });
 
 export const addInscricaoPartidaSchema = z.object({
