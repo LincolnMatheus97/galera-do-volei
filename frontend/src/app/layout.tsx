@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { Navbar } from "@/components/layout/Navbar";
+import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,7 +21,6 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body className={inter.className}>
-        {/* Envolvemos a aplicação com o AuthProvider para que o login funcione em tudo */}
         <AuthProvider>
           <div className="min-h-screen bg-gray-50 flex flex-col">
             <Navbar />
@@ -28,6 +28,7 @@ export default function RootLayout({
               {children}
             </main>
           </div>
+          <Toaster /> 
         </AuthProvider>
       </body>
     </html>
