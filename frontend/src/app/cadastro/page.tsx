@@ -42,7 +42,6 @@ export default function CadastroPage() {
                 description: "Bem-vindo à Galera do Vôlei.",
                 className: "bg-green-600 text-white"
             });
-            // O redirect acontece no AuthContext
         } catch (err: any) {
             const msg = err.response?.status === 409 
                 ? "Este email já está cadastrado." 
