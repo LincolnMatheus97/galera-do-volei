@@ -8,6 +8,10 @@ import { partidaRepository } from "../persistence/repositories/PrismaPartidaRepo
 import { conviteRepository } from "../persistence/repositories/PrismaConviteRepository.js";
 import { socialRepository } from "../persistence/repositories/PrismaSocialRepository.js";
 
+import { PdfKitProvider } from "../infra/providers/PdfKitProvider.js";
+
+export const makePdfProvider = new PdfKitProvider();
+
 export const makeJogadorService = new JogadorService(jogadorRepository);
 
 export const makePartidaService = new PartidaService(partidaRepository, jogadorRepository);

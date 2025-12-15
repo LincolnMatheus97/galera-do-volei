@@ -10,7 +10,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 
 export default function PagamentoPage() {
-    const { id } = useParams(); // id da partida
+    const { id } = useParams();
     const router = useRouter();
     const { user } = useAuth();
     const [codigo, setCodigo] = useState("");
@@ -76,7 +76,7 @@ export default function PagamentoPage() {
                         </p>
                     </div>
                     <Input 
-                        label="Código do Pix" 
+                        id="Código do Pix" 
                         placeholder="Ex: CPF, e-mail ou telefone" 
                         value={codigo}
                         onChange={(e) => setCodigo(e.target.value)}
@@ -93,7 +93,6 @@ export default function PagamentoPage() {
                         </button>
                     </form>
             
-
                 {/* Feedback Visual */}
                 {resultado && (
                     <div className={`mt-6 p-4 rounded-lg text-center animate-pulse ${

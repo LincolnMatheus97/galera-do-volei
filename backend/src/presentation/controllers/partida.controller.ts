@@ -1,8 +1,7 @@
 import { type Request, type Response } from 'express';
 import z from 'zod';
-import { makePartidaService as partidaService } from '../../main/factories.js';
+import { makePartidaService as partidaService, makePdfProvider as pdfProvider } from '../../main/factories.js';
 import { HttpException } from '../middleware/HttpException.middleware.js';
-import PDFDocument from 'pdfkit';
 
 // Schemas
 export const criarPartidaSchema = z.object({
@@ -111,34 +110,17 @@ class PartidaController {
 
         if (isNaN(idPartida) || isNaN(idUsuario)) throw new HttpException("Dados inválidos.", 400);
 
+        // 1. Busca os dados (Regra de Negócio)
         const dados = await partidaService.gerarDadosCertificado(idPartida, idUsuario);
 
-        const doc = new PDFDocument({ layout: 'landscape' }); // Deitado fica mais bonito
+        // 2. Gera o binário do PDF (Infraestrutura)
+        const pdfBuffer = await pdfProvider.gerarCertificado(dados);
         
+        // 3. Devolve a resposta HTTP (Apresentação)
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename=certificado_${idUsuario}.pdf`);
-
-        doc.pipe(res);
-        doc.rect(20, 20, doc.page.width - 40, doc.page.height - 40).stroke(); // Borda
-        doc.moveDown(2);
-        doc.font('Helvetica-Bold').fontSize(30).text('CERTIFICADO DE PARTICIPAÇÃO', { align: 'center' });
-        doc.moveDown();
-        doc.font('Helvetica').fontSize(16).text('Certificamos que', { align: 'center' });
-        doc.moveDown(0.5);
-        doc.font('Helvetica-Bold').fontSize(22).text(dados.participante, { align: 'center' });
-        doc.moveDown(0.5);
-        doc.font('Helvetica').fontSize(16).text('participou com êxito do evento', { align: 'center' });
-        doc.moveDown(0.5);
-        doc.font('Helvetica-Bold').fontSize(22).text(dados.evento, { align: 'center' });
-        doc.moveDown();
         
-        const dataFormatada = new Date(dados.data).toLocaleDateString('pt-BR');
-        doc.font('Helvetica').fontSize(14).text(`Realizado em: ${dataFormatada}`, { align: 'center' });
-        doc.moveDown(4);
-        doc.fillColor('grey').fontSize(10).text(`Código de Validação: ${dados.codigoValidacao}`, { align: 'center' });
-        doc.text('EventSync Oficial', { align: 'center' }).fillColor('black');
-
-        doc.end();
+        return res.send(pdfBuffer);
     }
 
     async criarInscricao(req: Request, res: Response) {

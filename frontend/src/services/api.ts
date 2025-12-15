@@ -2,7 +2,7 @@ import axios from 'axios';
 import { getCookie } from 'cookies-next';
 
 const api = axios.create({
-    baseURL: 'http://localhost:3333', // Endereço do seu Backend
+    baseURL: 'http://localhost:3333', // Endereço do Backend
     headers: {
         'Content-Type': 'application/json',
     },
@@ -19,7 +19,7 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
-// Interceptador: Tratamento de Erros (Opcional, mas recomendado)
+// Interceptador: Tratamento de Erros
 api.interceptors.response.use(
     (response) => response,
     (error) => {

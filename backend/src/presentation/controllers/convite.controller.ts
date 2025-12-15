@@ -5,7 +5,6 @@ import { HttpException } from "../middleware/HttpException.middleware.js";
 
 export const criarConviteSchema = z.object({
     nome_destinatario: z.string({ message: 'Nome do destinatario do convite é obrigatorio.' }),
-    // Novo campo opcional para resolver o problema de múltiplas partidas
     id_partida: z.number().optional()
 });
 
@@ -15,7 +14,6 @@ class ConviteController {
         const idUsuario = parseInt(req.headers['user-id'] as string, 10);
 
         if (isNaN(idUsuario)) {
-            console.error("--> ERRO: user-id é NaN ou inexistente!");
             throw new HttpException("Usuário não identificado.", 401);
         }
 
@@ -31,13 +29,12 @@ class ConviteController {
             throw new HttpException("Token inválido.", 401);
         }
 
-        // Captura o ID da partida se vier
         const { nome_destinatario, id_partida } = req.body;
 
         const novoConvite = await conviteService.criarConvite(
             idRemetente,
             nome_destinatario,
-            id_partida // Passa para o service
+            id_partida
         );
         return res.status(201).json(novoConvite);
     }

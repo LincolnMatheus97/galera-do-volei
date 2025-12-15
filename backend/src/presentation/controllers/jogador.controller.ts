@@ -3,7 +3,6 @@ import z from 'zod';
 import { makeJogadorService as jogadorService } from '../../main/factories.js';
 import { HttpException } from '../middleware/HttpException.middleware.js';
 
-// Schema atualizado para exigir Email e Senha
 export const criarJogadorSchema = z.object({
     nome: z.string().min(3, { message: "O nome é obrigatório e deve ter ao menos 3 caracteres." }),
     email: z.string().email({ message: "Email inválido." }),

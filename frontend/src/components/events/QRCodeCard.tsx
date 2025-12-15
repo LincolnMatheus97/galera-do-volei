@@ -7,7 +7,6 @@ interface QRCodeCardProps {
 }
 
 export function QRCodeCard({ inscricao, nomeEvento }: QRCodeCardProps) {
-    // O valor do QR é o código hash único gerado pelo backend
     const qrValue = inscricao.qrCode || "INVALID";
 
     return (
