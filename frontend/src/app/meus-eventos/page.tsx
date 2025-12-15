@@ -8,7 +8,6 @@ import { EventCard } from '@/components/events/EventCard';
 import { QRCodeCard } from '@/components/events/QRCodeCard';
 import { Ticket, Trophy, Calendar, Frown } from 'lucide-react';
 
-// Interface estendida para incluir o nome do evento no ticket visualmente
 interface InscricaoComEvento extends Inscricao {
     nomeEvento: string;
     dataEvento: string;
@@ -29,25 +28,16 @@ export default function MeusEventosPage() {
 
     async function carregarDados() {
         try {
-            // 1. Busca todas as partidas do sistema
             const res = await api.get<Partida[]>('/partidas');
             const todasPartidas = res.data;
-
-            // 2. Filtra: Eventos que EU organizei (Moderador)
             const organizando = todasPartidas.filter(p => p.moderador?.id === user?.id);
             setMinhasPartidas(organizando);
 
-            // 3. Filtra: Eventos que EU vou participar (Inscrições)
-            // Como o backend não tem rota "/meus-tickets", buscamos as inscrições de cada partida
             const ticketsEncontrados: InscricaoComEvento[] = [];
-
-            // Usamos Promise.all para buscar as listas de inscritos de todas as partidas em paralelo
             await Promise.all(todasPartidas.map(async (partida) => {
                 try {
                     const resInsc = await api.get<Inscricao[]>(`/partidas/${partida.id}/inscricoes`);
                     const inscricoesDaPartida = resInsc.data;
-
-                    // Encontra minha inscrição nessa partida (Comparando por ID é mais seguro)
                     const minhaInscricao = inscricoesDaPartida.find(i => i.jogadorId === user?.id);
 
                     if (minhaInscricao) {
@@ -63,7 +53,6 @@ export default function MeusEventosPage() {
                 }
             }));
 
-            // Ordena os tickets por data do evento
             const ticketsOrdenados = ticketsEncontrados.sort((a, b) => 
                 new Date(b.dataEvento).getTime() - new Date(a.dataEvento).getTime()
             );

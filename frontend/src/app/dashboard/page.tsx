@@ -78,8 +78,6 @@ export default function DashboardPage() {
           <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
             <Calendar className="text-blue-600" /> Eventos Disponíveis
           </h2>
-          
-          {/* CORREÇÃO: Removi a verificação de moderador para o botão aparecer para todos */}
           <Link 
             href="/partidas/criar" 
             className="flex items-center gap-2 bg-orange-500 text-white px-5 py-2.5 rounded-lg font-bold hover:bg-orange-600 transition-all shadow-md hover:shadow-lg"

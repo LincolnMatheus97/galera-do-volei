@@ -56,8 +56,9 @@ export default function CheckinPage() {
                 </div>
 
                 <form onSubmit={handleCheckin}>
+                    <label htmlFor="codigo" className="block text-sm font-medium text-gray-700 mb-2">Código do Cartão</label>
                     <Input 
-                        label="Código do Cartão" 
+                        id="codigo"
                         placeholder="Ex: 123e4567-e89b..." 
                         value={codigo}
                         onChange={(e) => setCodigo(e.target.value)}

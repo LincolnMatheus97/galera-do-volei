@@ -19,7 +19,6 @@ export class ConviteService {
         return [];
     }
 
-    // Adicionado parâmetro opcional partidaIdEspecifica
     async criarConvite(remetenteId: number, nomeDestinatario: string, partidaIdEspecifica?: number) {
 
         const remetente = await this.jogadorRepository.buscarPorId(remetenteId);

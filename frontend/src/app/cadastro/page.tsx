@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '@/context/AuthContext';
-import { Input } from '@/components/ui/Input'; // Componente visual do Lovable
+import { Input } from '@/components/ui/Input';
 import Link from 'next/link';
 import { useState } from 'react';
 import { UserPlus, ArrowRight } from 'lucide-react';

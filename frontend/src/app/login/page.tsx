@@ -1,14 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link'; // Next Link
-// import { useNavigate } from 'react-router-dom'; -> Removido
+import Link from 'next/link';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, User } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext'; // Sua lógica real
-import { Input } from '@/components/ui/Input'; // Seu componente UI
+import { useAuth } from '@/context/AuthContext'; 
 
 export default function LoginPage() {
-  const { login } = useAuth(); // Hook real
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -22,7 +20,6 @@ export default function LoginPage() {
     
     try {
       await login({ email, senha: password });
-      // O redirect acontece dentro do AuthContext ou aqui via router.push('/dashboard')
     } catch (error) {
       setErrorMsg("Falha no login. Verifique suas credenciais.");
     } finally {
@@ -108,9 +105,6 @@ export default function LoginPage() {
                 <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
                 <span className="text-sm text-gray-500">Lembrar de mim</span>
               </label>
-              <Link href="#" className="text-sm text-blue-600 hover:underline font-medium">
-                Esqueceu a senha?
-              </Link>
             </div>
 
             <button

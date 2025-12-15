@@ -10,8 +10,6 @@ export function Navbar() {
   const { user, logout, isAuthenticated } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
-
-  // Define os links com base no estado de login, mantendo as rotas originais do seu projeto
   const navLinks = isAuthenticated ? [
     { href: '/dashboard', label: 'Eventos', icon: Home },
     { href: '/meus-eventos', label: 'Minhas Inscrições', icon: Ticket },

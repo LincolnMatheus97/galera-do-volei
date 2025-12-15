@@ -1,5 +1,3 @@
-// Espelho dos dados retornados pelo Backend
-
 export interface Usuario {
     id: number;
     nome: string;
@@ -13,12 +11,11 @@ export interface AuthResponse {
     usuario: Usuario;
 }
 
-// Interface para Avaliação
 export interface Avaliacao {
     id: number;
     nota: number;
     comentario: string;
-    nome_jogador: string; // O backend salva o nome snapshot ou busca do relacionamento
+    nome_jogador: string;
     jogadorId: number;
 }
 
@@ -40,7 +37,7 @@ export interface Partida {
         email?: string;
     };
     inscricoes?: Inscricao[];
-    avaliacoes?: Avaliacao[]; // Adicionado campo de avaliações
+    avaliacoes?: Avaliacao[];
 }
 
 export interface Inscricao {

@@ -1,4 +1,4 @@
-'use client'; // Obrigatório para Contextos no Next.js App Router
+'use client';
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { setCookie, deleteCookie, getCookie } from 'cookies-next';
@@ -83,5 +83,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     );
 }
 
-// Hook personalizado para facilitar o uso
 export const useAuth = () => useContext(AuthContext);

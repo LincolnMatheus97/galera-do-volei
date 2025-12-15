@@ -72,8 +72,6 @@ export default function EditarPartidaPage() {
             const dataCombinada = new Date(`${data.data}T${data.hora}:00`);
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { hora, data: dataString, ...rest } = data;
-            
-            // Lógica: Se a partida original era gratuita (0), mantemos 0. Se era paga, usa o valor do form.
             const precoFinal = (partida && partida.preco > 0) ? data.preco : 0;
 
             const payload = {

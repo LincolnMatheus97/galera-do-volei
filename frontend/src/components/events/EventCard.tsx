@@ -6,7 +6,6 @@ interface EventCardProps {
   partida: Partida;
 }
 
-// ATENÇÃO: Note o "export function" (nomeada) ao invés de "const ... export default"
 export function EventCard({ partida }: EventCardProps) {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);

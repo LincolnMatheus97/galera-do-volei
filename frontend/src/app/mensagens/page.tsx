@@ -45,7 +45,7 @@ export default function MensagensPage() {
             setAmigos(resAmigos.data);
 
             const listaFormatada = resAmigos.data
-                .filter((a: any) => a.status === 'aceita') // Só pode enviar para quem é amigo aceito
+                .filter((a: any) => a.status === 'aceita')
                 .map((a: any) => {
                     const amigoReal = a.solicitante.id === user?.id ? a.destinatario : a.solicitante;
                     return {
@@ -87,14 +87,9 @@ export default function MensagensPage() {
 
     async function responderAmizade(id: number, aceitar: boolean) {
         try {
-            const endpoint = aceitar ? 'aceitar' : 'recusar'; // Backend pode não ter recusar implementado na rota social, verifique se necessário
-            // Se não tiver rota de recusar no back, ignoramos por enquanto ou implemente lá
             if (aceitar) {
                  await api.post(`/amigos/${id}/aceitar`);
                  toast({ title: "Amizade aceita!", className: "bg-green-600 text-white" });
-            } else {
-                 // await api.post(`/amigos/${id}/recusar`); 
-                 toast({ description: "Recurso de recusar em breve." });
             }
             fetchSocialData();
         } catch (error) {

@@ -20,7 +20,6 @@ export default function ConvitesPage() {
     async function fetchConvites() {
         try {
             const res = await api.get<Convite[]>('/convites');
-            // Filtra convites pendentes onde sou o destinatário
             const pendentesRecebidos = res.data.filter(c => 
                 c.status === 'pendente' && c.destinatario.id === user?.id
             );

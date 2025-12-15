@@ -29,7 +29,6 @@ export default function PerfilPage() {
     useEffect(() => {
         if (user) {
             setValue("nome", user.nome);
-            // Se tiver sexo/categoria no user do context, setar aqui também
         }
     }, [user, setValue]);
 

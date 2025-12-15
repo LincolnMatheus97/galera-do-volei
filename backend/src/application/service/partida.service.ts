@@ -27,7 +27,6 @@ export class PartidaService {
         return partida;
     }
 
-    // Agora usamos o DTO oficial atualizado
     async criarPartida(idModerador: number, dataPartida: CriarPartidaDTO) {
         const moderador = await this.jogadorRepository.buscarPorId(idModerador);
         if (!moderador) throw new NotFoundErro("Moderador não encontrado.");
@@ -72,7 +71,6 @@ export class PartidaService {
             throw new NotFoundErro("Não há inscritos para esta partida.");
         }
 
-        // Gera CSV
         let csv = "ID,Nome,Email,Status,CheckIns\n";
         inscricoes.forEach((i: any) => {
             csv += `${i.id},${i.jogador.nome},${i.jogador.email},${i.status},${i.checkInCount}\n`;
@@ -89,8 +87,7 @@ export class PartidaService {
         const inscricao = inscricoes.find((i: any) => i.jogadorId === idUsuario);
 
         if (!inscricao) throw new NotAllowed("Você não está inscrito neste evento.");
-        
-        // Regra do PDF: Exige Check-in
+
         if (inscricao.checkInCount < 1) {
             throw new NotAllowed("Certificado disponível apenas para quem realizou check-in.");
         }

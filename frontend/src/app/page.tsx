@@ -1,11 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight, Users, Calendar, MapPin, Trophy, Star, ChevronRight, Activity } from 'lucide-react';
+import { ArrowRight, Users, Calendar, MapPin, Star, ChevronRight, Activity, UserStar } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { api } from '@/services/api';
 import { Partida } from '@/types';
-import { EventCard } from '@/components/events/EventCard'; // Importação corrigida { }
+import { EventCard } from '@/components/events/EventCard';
 
 // Dados estáticos para seções institucionais (Features, Depoimentos)
 const features = [
@@ -20,9 +20,9 @@ const features = [
     description: 'Conecte-se com outros entusiastas do vôlei na sua região.',
   },
   {
-    icon: Trophy,
-    title: 'Participe de Torneios',
-    description: 'Compita em torneios amadores e profissionais.',
+    icon: UserStar,
+    title: 'Deixe Avaliações',
+    description: 'Avalie partidas e organizadores para ajudar a comunidade a crescer.',
   },
   {
     icon: MapPin,
@@ -33,22 +33,22 @@ const features = [
 
 const testimonials = [
   {
-    name: 'Ana Carolina',
+    name: 'Natiele Grazielly',
     role: 'Jogadora Amadora',
-    text: 'O app mudou minha forma de encontrar partidas. Sempre tem um jogo perto de casa!',
-    avatar: 'A',
+    text: 'Nunca foi tão fácil encontrar partidas perto de mim!',
+    avatar: 'N',
   },
   {
-    name: 'Roberto Santos',
+    name: 'Marcos Gabriel',
     role: 'Organizador',
     text: 'Gerenciar inscrições e check-ins nunca foi tão fácil. Recomendo demais!',
-    avatar: 'R',
+    avatar: 'M',
   },
   {
-    name: 'Mariana Lima',
-    role: 'Jogadora Pro',
+    name: 'Thalisson Moura',
+    role: 'Jogador Profissional',
     text: 'Encontrei meu time de competição através do app. Comunidade incrível!',
-    avatar: 'M',
+    avatar: 'T',
   },
 ];
 
@@ -73,8 +73,6 @@ export default function Home() {
 
     return (
         <div className="min-h-screen bg-slate-50">
-            {/* O Navbar já está no layout.tsx, não precisamos repetir aqui */}
-
             {/* Hero Section */}
             <section className="relative overflow-hidden bg-slate-900 pt-20 pb-32 md:pt-32 md:pb-48">
                 {/* Background Decorativo */}
@@ -286,13 +284,11 @@ export default function Home() {
                         </div>
                         
                         <div className="flex flex-wrap justify-center gap-8 text-slate-500 font-medium text-sm">
-                            <Link href="#" className="hover:text-blue-600 transition-colors">Sobre</Link>
-                            <Link href="#" className="hover:text-blue-600 transition-colors">Termos</Link>
-                            <Link href="#" className="hover:text-blue-600 transition-colors">Privacidade</Link>
-                            <Link href="#" className="hover:text-blue-600 transition-colors">Contato</Link>
+                            <Link href="https://github.com/LincolnMatheus97" className="hover:text-blue-600 transition-colors">Contato</Link>
                         </div>
                         
                         <p className="text-sm text-slate-400">
+                            Desenvolvido por <strong>Lincoln Matheus</strong>
                             © 2025 Galera do Vôlei.
                         </p>
                     </div>

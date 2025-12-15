@@ -7,29 +7,7 @@ import { api } from '@/services/api';
 import { Partida, Inscricao, Avaliacao } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import {
-  Calendar,
-  MapPin,
-  DollarSign,
-  Users,
-  ArrowLeft,
-  Edit,
-  UserCheck,
-  Lock,
-  CheckCircle2,
-  Clock,
-  XCircle,
-  AlertCircle,
-  Share2,
-  Heart,
-  Unlock,
-  CheckSquare,
-  Trophy,
-  Star,
-  Award,
-  UserPlus,
-  Send
-} from 'lucide-react';
+import {Calendar, MapPin, DollarSign, Users, ArrowLeft, UserCheck, CheckCircle2, Clock, XCircle, AlertCircle, Share2, Heart, Trophy, Star, Award, UserPlus, Send} from 'lucide-react';
 import { QRCodeCard } from '@/components/events/QRCodeCard';
 
 type PartidaDetalhes = Omit<Partida, 'avaliacoes'> & {
@@ -107,7 +85,6 @@ export default function PartidaDetailsPage() {
   }
 
   async function handleSolicitarAmizade(emailDestino: string) {
-    // Confirm nativo é aceitável para ações de confirmação
     if (!confirm(`Enviar solicitação de amizade?`)) return;
     try {
         await api.post('/amigos/solicitar', { email: emailDestino });
