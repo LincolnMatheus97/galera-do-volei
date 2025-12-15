@@ -51,17 +51,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             setUser(usuario);
 
-            router.push('/dashboard'); // Redireciona para o Dashboard após login
+            router.push('/dashboard');
         } catch (error) {
             console.error("Erro ao fazer login", error);
-            throw error; // Lança o erro para a tela mostrar a mensagem
+            throw error; 
         }
     }
 
     async function register(data: CadastroInput) {
         try {
             await api.post('/jogadores', data);
-            // Após cadastrar, fazemos login automático
             await login({ email: data.email, senha: data.senha });
         } catch (error) {
             console.error("Erro ao cadastrar", error);

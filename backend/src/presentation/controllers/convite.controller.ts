@@ -14,7 +14,6 @@ class ConviteController {
         const idUsuario = parseInt(req.headers['user-id'] as string, 10);
 
         if (isNaN(idUsuario)) {
-            console.error("--> ERRO: user-id é NaN ou inexistente!");
             throw new HttpException("Usuário não identificado.", 401);
         }
 

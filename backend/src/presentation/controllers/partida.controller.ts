@@ -121,7 +121,7 @@ class PartidaController {
         doc.pipe(res);
         doc.rect(20, 20, doc.page.width - 40, doc.page.height - 40).stroke(); // Borda
         doc.moveDown(2);
-        doc.font('Helvetica-Bold').fontSize(30).text('CERTIFICADO DE PARTICIPAÇÃO', { align: 'center' });
+        doc.font('Helvetica-Bold').fontSize(30).text('CERTIFICADO DE PARTICIPAÇÃO 🏐', { align: 'center' });
         doc.moveDown();
         doc.font('Helvetica').fontSize(16).text('Certificamos que', { align: 'center' });
         doc.moveDown(0.5);
