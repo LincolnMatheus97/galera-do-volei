@@ -17,7 +17,7 @@ O projeto foi desenvolvido em três fases, servindo como estudo de caso sobre ma
 
 ### Fase 1: O Monólito (Ponto de Partida)
 
-Tudo começou em um único arquivo: **[_index_monolitico.ts](https://github.com/LincolnMatheus97/galera-do-volei/blob/backend/src/_index_monolitico.ts)**, junto a sua documentação que está no **[_README.md](https://github.com/LincolnMatheus97/galera-do-volei/blob/_README.md)**
+Tudo começou em um único arquivo: **[_index_monolitico.ts](https://github.com/LincolnMatheus97/galera-do-volei/blob/main/backend/src/_index_monolitico.ts)**, junto a sua documentação que está no **[_README.md](https://github.com/LincolnMatheus97/galera-do-volei/blob/main/_README.md)**
 
 * Toda a lógica concentrada em um único ponto (rotas, validação e dados em memória)
 * Baixa manutenibilidade, difícil escalar e testar
