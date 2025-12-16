@@ -24,7 +24,7 @@ Tudo começou em um único arquivo: **[_index_monolitico.ts](https://github.com/
 
 ### Fase 2: Arquitetura em Camadas (Refatoração)
 
-Evolui para uma aplicação com arquitetura em camadas no backend, aqui esta uma documentação detalhada sobre essa transformação: **[__README.md](https://github.com/LincolnMatheus97/galera-do-volei/blob/__README.md)**
+Evolui para uma aplicação com arquitetura em camadas no backend, aqui esta uma documentação detalhada sobre essa transformação: **[__README.md](https://github.com/LincolnMatheus97/galera-do-volei/blob/main/__README.md)**
 
 ### Fase 3: Sistema Completo (Estado Atual)
 
@@ -165,9 +165,9 @@ A flag `-i` evita conflitos no SQLite.
 
 ## Documentação Adicional
 
-* **[DEV_LOG.md](https://github.com/LincolnMatheus97/galera-do-volei/blob/docs/DEV_LOG.md)**: Diário de Bordo (Dev Log)
-* **[ARCHITECTURE.md](https://github.com/LincolnMatheus97/galera-do-volei/blob/docs/ARCHITECTURE.md)**: Documentação de Arquitetura
-* **[TEST_CHECKLIST.md](https://github.com/LincolnMatheus97/galera-do-volei/blob/docs/TEST_CHECKLIST.md)**: Checklist de Testes
-* **[PLANNING_UPGRADE.md](https://github.com/LincolnMatheus97/galera-do-volei/blob/docs/PLANNING_UPGRADE.md)**: Plano de Upgrade do Sistema
+* **[DEV_LOG.md](https://github.com/LincolnMatheus97/galera-do-volei/blob/main/docs/DEV_LOG.md)**: Diário de Bordo (Dev Log)
+* **[ARCHITECTURE.md](https://github.com/LincolnMatheus97/galera-do-volei/blob/main/docs/ARCHITECTURE.md)**: Documentação de Arquitetura
+* **[TEST_CHECKLIST.md](https://github.com/LincolnMatheus97/galera-do-volei/blob/main/docs/TEST_CHECKLIST.md)**: Checklist de Testes
+* **[PLANNING_UPGRADE.md](https://github.com/LincolnMatheus97/galera-do-volei/blob/main/docs/PLANNING_UPGRADE.md)**: Plano de Upgrade do Sistema
 
 **Desenvolvido por Lincoln Matheus**
