@@ -1,90 +1,173 @@
-# Galera do Vôlei 2.0: A Evolução de uma API
+# Galera do Vôlei (EventSync) 🏐
 
-## Visão Geral
+> **Disciplina:** Programação para Internet II – IFPI (2025.2)
+> **Professor:** Rogério Silva
+> **Projeto Final:** EventSync + IA
 
-Bem-vindo à versão 2.0 da API "Galera do Vôlei". Este projeto, iniciado como uma atividade acadêmica, foi refatorado com o objetivo de evoluir de um script monolítico para uma aplicação com arquitetura moderna, escalável e de fácil manutenção.
+Este repositório contém a implementação completa do sistema **Galera do Vôlei**, uma plataforma web responsiva para gerenciamento de eventos esportivos, desenvolvida conforme a especificação **EventSync**.
+O projeto representa a evolução de um script simples de estudo para uma aplicação **Full Stack** robusta, aplicando **Clean Architecture**, **SOLID**, **Testes Automatizados** e **Integração Frontend/Backend**.
 
-O foco desta nova versão foi aplicar princípios de design de software como **SOLID** e conceitos da **Clean Architecture** para criar uma base de código robusta, organizada e preparada para futuras expansões.
+![PaginaDePartida](https://i.imgur.com/aiWSIn6.png)
+![Certificado](https://i.imgur.com/ZOkQGxj.png)
 
-## A Jornada da Refatoração: Do Monólito à Arquitetura em Camadas
 
-Esta seção documenta o processo de transformação da API, servindo como um estudo de caso prático de refatoração.
+## A Jornada da Evolução
 
-### O Ponto de Partida: O Monólito
+O projeto foi desenvolvido em três fases, servindo como estudo de caso sobre maturidade de software.
 
-A versão inicial da API foi desenvolvida em um único arquivo, **[_index_monolitico.ts](https://github.com/LincolnMatheus97/galera-do-volei/blob/main/src/_index_monolitico.ts)**, junto a sua documentação que está no **[_README.md](https://github.com/LincolnMatheus97/galera-do-volei/blob/main/_README.md)**. Este arquivo continha todas as responsabilidades da aplicação:
+### Fase 1: O Monólito (Ponto de Partida)
 
-* Configuração do servidor Express.
-* Definição de todas as rotas e endpoints.
-* Lógica de manipulação das requisições (lógica de controller).
-* Regras de negócio da aplicação (lógica de serviço).
-* Persistência de dados em arrays na memória (lógica de repositório).
-* Definição de todos os tipos e schemas de dados.
+Tudo começou em um único arquivo: **[_index_monolitico.ts](https://github.com/LincolnMatheus97/galera-do-volei/blob/backend/src/_index_monolitico.ts)**, junto a sua documentação que está no **[_README.md](https://github.com/LincolnMatheus97/galera-do-volei/blob/_README.md)**
 
-Embora funcional, essa abordagem centralizada apresentava desafios de manutenção, testabilidade e escalabilidade.
+* Toda a lógica concentrada em um único ponto (rotas, validação e dados em memória)
+* Baixa manutenibilidade, difícil escalar e testar
 
-### Os Princípios Orientadores
+### Fase 2: Arquitetura em Camadas (Refatoração)
 
-A refatoração foi guiada pelos seguintes princípios e padrões de arquitetura:
+Evolui para uma aplicação com arquitetura em camadas no backend, aqui esta uma documentação detalhada sobre essa transformação: **[__README.md](https://github.com/LincolnMatheus97/galera-do-volei/blob/__README.md)**
 
-1.  **Clean Architecture & DDD:** A principal inspiração foi a separação da aplicação em camadas independentes, cada uma com uma responsabilidade clara, garantindo que a lógica de negócio (domínio) permaneça isolada de detalhes de infraestrutura (como o Express).
-2.  **SOLID - Princípio da Responsabilidade Única (SRP):** Cada classe e módulo agora tem um, e apenas um, motivo para mudar. Por exemplo, um `Controller` só muda se a lógica de HTTP mudar, enquanto um `Service` só muda se uma regra de negócio mudar.
-3.  **Centralização de Lógica Transversal com Middlewares:** Lógicas que se aplicam a múltiplas rotas, como logging, autenticação e tratamento de erros, foram extraídas para middlewares, evitando a repetição de código e centralizando o controle.
+### Fase 3: Sistema Completo (Estado Atual)
 
-### A Arquitetura Resultante
+Então agora o backend foi reescrito adotando **Clean Architecture**.
 
-A aplicação agora está organizada na seguinte estrutura de camadas:
+* Separação em `Presentation`, `Application`, `Domain` e `Persistence`
+* Uso de **Prisma ORM (SQLite)**, **Zod** para validações e **JWT** para autenticação
 
-* #### `presentation` (Camada de Apresentação e Infraestrutura Web)
-    * **`routes`**: Define os endpoints da API e os verbos HTTP. É aqui que os middlewares de validação e autenticação são aplicados a rotas específicas.
-    * **`controllers`**: Responsáveis por receber a requisição (`Request`) e devolver a resposta (`Response`). Eles orquestram o fluxo, invocam o `Service` apropriado da camada de aplicação e formatam o retorno para o cliente, atuando após a passagem pelos middlewares.
-    * **`middleware`**: Funções que interceptam as requisições para executar lógicas centralizadas. Isso inclui a validação dos dados de entrada (usando **Zod**), autenticação (`authMiddleware`), logging (`logMiddleware`) e o tratamento global de erros (`globalErrorMiddleware`), mantendo os controllers limpos e focados em sua principal responsabilidade.
+Integração total com frontend moderno e funcionalidades avançadas do EventSync.
 
-* #### `application` (Camada de Aplicação)
-    * **`service`**: O coração da aplicação. Contém a lógica de negócio e os casos de uso ("Criar um Jogador", "Aceitar um Convite"). Nesta versão, os serviços também gerenciam a persistência dos dados em memória.
-    * **`errors`**: Define classes de erro customizadas (`NotFoundError`, `ConflictError`) que são lançadas pela camada de aplicação, permitindo que a camada de apresentação as traduza para os status HTTP corretos.
+* Interface **Mobile First**
+* QR Code e Scanner de Check-in
+* Fluxo social entre participantes
+* Pagamento via **PIX (simulado)**
+* Emissão automática de **Certificados em PDF**
 
-* #### `main` ou `domain` (Camada de Domínio)
-    * **`index.model.ts`**: O núcleo do sistema. Define as estruturas e tipos de dados fundamentais (`Jogador`, `Partida`, `Convite`), representando as entidades do domínio do problema.
 
-## Jornadas de Usuário e Endpoints
+## Funcionalidades (EventSync)
 
-A API foi modelada para atender a duas jornadas de usuário principais, que vão além de um simples CRUD.
+O sistema atende aos requisitos do documento **“EventSync + IA – Projeto Final Disciplina”**.
 
 ### Jornada do Organizador (Moderador)
-1.  **Cria uma nova partida** (`POST /partidas`).
-2.  **Divulga a partida**, convidando jogadores (`POST /convites`) ou abrindo para inscrições (`POST /partidas/{id}/inscricoes`).
-3.  **Gerencia os pedidos de participação**, listando (`GET`), aceitando (`POST /inscricoes/{id}/aceitar`) ou rejeitando (`POST /inscricoes/{id}/rejeitar`) as solicitações.
-4.  **Fecha as inscrições** alterando a situação da partida (`PATCH /partidas/{id}`).
-5.  **Recebe avaliações** sobre a organização (`POST /partidas/{id}/avaliacoes`).
+
+* Criar, editar, abrir/fechar inscrições e finalizar eventos
+* Configurar eventos gratuitos ou pagos (chave PIX)
+* Definir limite de check-ins e banner personalizado
+* Aprovar ou recusar inscrições pendentes
+* Realizar check-in via **Scanner de QR Code**
+* Exportar lista de presença (CSV)
+* Visualizar avaliações pós-evento
 
 ### Jornada do Jogador (Participante)
-1.  **Procura por partidas abertas** (`GET /partidas`).
-2.  **Solicita a participação** se inscrevendo (`POST /partidas/{id}/inscricoes`) ou aceita um convite (`POST /convites/{id}/aceitar`).
-3.  **Recebe a confirmação** de que foi aceito na partida.
-4.  **Avalia a partida e o organizador** (`POST /partidas/{id}/avaliacoes`).
 
-Para uma documentação interativa e detalhada de todos os endpoints, acesse o link no Apidog:
-**[https://galeradovolei.apidog.io](https://galeradovolei.apidog.io)**
+* Visualizar feed de eventos públicos e “Meus Eventos”
+* Inscrição automática (gratuitos) ou com aprovação/pagamento (pagos)
+* Ticket digital com **QR Code** exclusivo
+* Sistema social: amigos e mensagens privadas (restrito ao mesmo evento)
+* Avaliar eventos após o check-in
+* Download automático do **Certificado de Participação (PDF)**
 
-## Como Executar o Projeto
+## Stack Tecnológica
 
-Siga os passos abaixo para executar a aplicação localmente.
+### Backend (API REST)
 
-1.  **Clone o repositório:**
-    ```bash
-    git clone https://github.com/LincolnMatheus97/galera-do-volei.git
-    cd galera-do-volei
-    ```
+* Node.js + Express
+* TypeScript (Strict Mode)
+* Clean Architecture / DDD
+* SQLite + Prisma ORM
+* Testes: Jest + Supertest
+* Extras:
 
-2.  **Instale as dependências:**
-    ```bash
-    npm install
-    ```
+  * `pdfkit` (certificados)
+  * `bcryptjs` (hash de senhas)
+  * `jsonwebtoken` (autenticação)
 
-3.  **Execute o servidor de desenvolvimento:**
-    ```bash
-    npm run dev
-    ```
+### Frontend (Web App)
 
-4.  O servidor estará rodando em `http://localhost:3333`.
+* Next.js 15+ (App Router)
+* TailwindCSS + ShadCN/UI
+* Context API para autenticação
+* React Hook Form + Zod
+* Axios com interceptors
+* Design responsivo focado em dispositivos móveis
+
+## Arquitetura do Projeto
+
+Monorepo com frontend e backend separados:
+
+```
+galera-do-volei/
+├── backend/
+│   ├── src/
+│   │   ├── application/    # Regras de negócio
+│   │   ├── domain/         # Contratos e interfaces
+│   │   ├── persistence/    # Prisma e banco de dados
+│   │   ├── presentation/   # Controllers, rotas e middlewares
+│   │   └── shared/         # DTOs e erros customizados
+│   ├── tests/              # Testes de integração
+│   └── prisma/             # Schema e migrations
+├── frontend/
+│   ├── src/
+│   │   ├── app/             # App Router (páginas)
+│   │   ├── components/      # Componentes de UI
+│   │   ├── context/         # Estado global
+│   │   └── services/        # Axios e integrações
+└── docs/                    # Documentação do projeto
+```
+
+## Uso de Inteligência Artificial
+
+A IA foi usada como **ferramenta de apoio**, sem substituir autoria humana.
+
+* Frontend: auxílio em componentes complexos com Tailwind e layout responsivo
+* Backend: geração de boilerplate para testes repetitivos
+* Documentação: organização e formatação técnica
+
+Todo código foi revisado, tipado e integrado à arquitetura do projeto.
+
+## Como Executar
+
+### Pré-requisitos
+
+* Node.js v18 ou superior
+* NPM ou Yarn
+
+### Backend
+
+```bash
+cd backend
+npm install
+
+npx prisma migrate dev
+npm run dev
+```
+
+Servidor em `http://localhost:3333`
+
+### Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Acesse `http://localhost:3000`
+
+## Testes Automatizados
+
+Testes de integração cobrindo autenticação, inscrições, check-in e fluxo social.
+
+```bash
+cd backend
+npm test -- -i
+```
+
+A flag `-i` evita conflitos no SQLite.
+
+## Documentação Adicional
+
+* **[DEV_LOG.md](https://github.com/LincolnMatheus97/galera-do-volei/blob/docs/DEV_LOG.md)**: Diário de Bordo (Dev Log)
+* **[ARCHITECTURE.md](https://github.com/LincolnMatheus97/galera-do-volei/blob/docs/ARCHITECTURE.md)**: Documentação de Arquitetura
+* **[TEST_CHECKLIST.md](https://github.com/LincolnMatheus97/galera-do-volei/blob/docs/TEST_CHECKLIST.md)**: Checklist de Testes
+* **[PLANNING_UPGRADE.md](https://github.com/LincolnMatheus97/galera-do-volei/blob/docs/PLANNING_UPGRADE.md)**: Plano de Upgrade do Sistema
+
+**Desenvolvido por Lincoln Matheus**
